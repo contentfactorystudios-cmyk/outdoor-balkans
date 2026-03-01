@@ -1,0 +1,70 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "fishing": "Angeln",
+    "hunting": "Jagd",
+    "kayak": "Kajak & Seen",
+    "camping": "Camping",
+    "hiking": "Wandern",
+    "reserves": "Naturschutzgebiete",
+    "news": "Neuigkeiten",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "propose": "Ort hinzufügen",
+    "admin": "Admin Panel",
+    "search": "Suchen",
+    "language": "Sprache"
+  },
+  "home": {
+    "heroTitle": "Finde den perfekten Outdoor",
+    "heroTitle2": "Ort",
+    "heroSubtitle": "Tausende von Orten zum Angeln, Jagen, Campen und Wandern auf dem Balkan.",
+    "searchPlaceholder": "Orte, Flüsse, Berge suchen...",
+    "searchBtn": "Suchen",
+    "advanced": "Erweitert",
+    "statsLocations": "Orte",
+    "statsCategories": "Kategorien",
+    "statsCountries": "Länder",
+    "statsWeather": "Prognose",
+    "categoriesTitle": "Nach Kategorie suchen",
+    "categoriesSubtitle": "Wähle deine Outdoor-Aktivität",
+    "featuredTitle": "Empfohlene Orte",
+    "recentTitle": "Neueste Orte",
+    "ctaTitle": "Kennst du einen guten Ort?",
+    "ctaBtn": "Ort hinzufügen",
+    "ctaBtn2": "Gemeinschaftsvorschläge"
+  },
+  "location": {
+    "season": "Saison",
+    "permit": "Genehmigung",
+    "permitRequired": "Genehmigung erforderlich",
+    "gps": "GPS-Standort",
+    "openMaps": "In Google Maps öffnen",
+    "share": "Teilen",
+    "noImage": "Hast du ein Foto dieses Ortes? Füge es hinzu!",
+    "addImage": "Foto hinzufügen",
+    "practical": "Praktische Informationen",
+    "comments": "Kommentare"
+  },
+  "weather": {
+    "now": "Jetzt",
+    "week": "7 Tage",
+    "feelsLike": "gefühlt",
+    "wind": "Wind",
+    "humidity": "Luftfeuchtigkeit",
+    "today": "Heute",
+    "tomorrow": "Morgen"
+  },
+  "common": {
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "back": "Zurück",
+    "readMore": "Seite besuchen ↗",
+    "noResults": "Keine Ergebnisse",
+    "filter": "Filter",
+    "all": "Alle"
+  }
+}

@@ -1,26 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import 'leaflet/dist/leaflet.css';
 @import "tailwindcss";
 
+.leaflet-container { height: 100%; width: 100%; z-index: 0; }
+.leaflet-popup-content-wrapper { border-radius: 12px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important; }
+.leaflet-popup-content { margin: 12px 16px !important; }
+
+.btn-primary {
+  display: inline-block;
+  background-color: #15803d;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  text-align: center;
+}
+.btn-primary:hover { background-color: #166534; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink:     #0e1a0e;
+  --forest:  #1c3a1c;
+  --sage:    #4a7c59;
+  --cream:   #f4f0e6;
+  --warm:    #e8e2d4;
+  --mist:    #8fa68f;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.font-serif  { font-family: 'Playfair Display', Georgia, serif; }
+.font-sans   { font-family: 'DM Sans', system-ui, sans-serif; }
+
+body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--cream); }
+
+.hero-terrain {
+  background:
+    radial-gradient(ellipse 100% 80% at 100% 0%,   rgba(28,58,28,0.9)   0%, transparent 60%),
+    radial-gradient(ellipse 70%  70% at 0%   100%,  rgba(10,20,10,0.95)  0%, transparent 55%),
+    linear-gradient(160deg, #0a0f0a 0%, #1c3a1c 40%, #0e1a0e 100%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.topo-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Cpath d='M0 400 Q200 200 400 300 T800 250' stroke='%234a7c59' stroke-width='0.6' fill='none' opacity='0.15'/%3E%3Cpath d='M0 450 Q150 300 350 380 T800 320' stroke='%234a7c59' stroke-width='0.6' fill='none' opacity='0.12'/%3E%3Cpath d='M0 500 Q250 350 450 420 T800 370' stroke='%234a7c59' stroke-width='0.6' fill='none' opacity='0.1'/%3E%3Cpath d='M0 350 Q300 150 500 280 T800 200' stroke='%234a7c59' stroke-width='0.6' fill='none' opacity='0.08'/%3E%3Cpath d='M0 550 Q200 400 400 480 T800 430' stroke='%234a7c59' stroke-width='0.6' fill='none' opacity='0.08'/%3E%3Cpath d='M100 600 Q350 420 550 520 T800 480' stroke='%234a7c59' stroke-width='0.5' fill='none' opacity='0.07'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.card-lift {
+  transition: transform 0.4s cubic-bezier(.22,.68,0,1.15), box-shadow 0.4s ease;
+}
+.card-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 32px 64px -16px rgba(14,26,14,0.25);
+}
+
+.img-zoom img {
+  transition: transform 0.6s cubic-bezier(.25,.46,.45,.94);
+}
+.img-zoom:hover img {
+  transform: scale(1.06);
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rise-1 { animation: rise 0.8s 0.1s both; }
+.rise-2 { animation: rise 0.8s 0.25s both; }
+.rise-3 { animation: rise 0.8s 0.4s both; }
+.rise-4 { animation: rise 0.8s 0.55s both; }
+
+.divider-leaf::before {
+  content: '◆';
+  color: var(--sage);
+  font-size: 0.6rem;
+  margin: 0 12px;
+}
+
+/* Category circle hover — bez JS handlera */
+.cat-circle {
+  transition: transform 0.3s cubic-bezier(.22,.68,0,1.2), box-shadow 0.3s ease;
+}
+.cat-circle:hover {
+  transform: scale(1.07);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.22) !important;
+}
+
+/* Social sidebar hover */
+.social-btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.social-btn:hover {
+  transform: scale(1.12) translateX(-4px) !important;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18) !important;
+}
+
+/* Hide social sidebar on mobile */
+@media (max-width: 768px) {
+  .social-sidebar { display: none !important; }
+}
+
+/* Login two-column layout */
+@media (min-width: 900px) {
+  .login-photo { display: block !important; }
+}
+
+/* Top 10 red hover */
+.top-row:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Login split layout — foto samo na wide screen */
+@media (min-width: 900px) {
+  .login-photo { display: block !important; }
 }

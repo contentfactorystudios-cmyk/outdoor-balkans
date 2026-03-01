@@ -1,0 +1,70 @@
+{
+  "nav": {
+    "home": "Главная",
+    "fishing": "Рыбалка",
+    "hunting": "Охота",
+    "kayak": "Каяк и Озёра",
+    "camping": "Кемпинг",
+    "hiking": "Пешие прогулки",
+    "reserves": "Природные резерваты",
+    "news": "Новости",
+    "login": "Войти",
+    "register": "Регистрация",
+    "logout": "Выйти",
+    "propose": "Добавить место",
+    "admin": "Панель администратора",
+    "search": "Поиск",
+    "language": "Язык"
+  },
+  "home": {
+    "heroTitle": "Найди идеальное место для",
+    "heroTitle2": "отдыха на природе",
+    "heroSubtitle": "Тысячи мест для рыбалки, охоты, кемпинга и пешего туризма на Балканах.",
+    "searchPlaceholder": "Поиск мест, рек, гор...",
+    "searchBtn": "Найти",
+    "advanced": "Расширенный",
+    "statsLocations": "Мест",
+    "statsCategories": "Категорий",
+    "statsCountries": "Стран",
+    "statsWeather": "Прогноз",
+    "categoriesTitle": "Поиск по категории",
+    "categoriesSubtitle": "Выбери свою активность",
+    "featuredTitle": "Рекомендуемые места",
+    "recentTitle": "Последние места",
+    "ctaTitle": "Знаешь хорошее место?",
+    "ctaBtn": "Добавить место",
+    "ctaBtn2": "Предложения сообщества"
+  },
+  "location": {
+    "season": "Сезон",
+    "permit": "Разрешение",
+    "permitRequired": "Требуется разрешение",
+    "gps": "GPS-координаты",
+    "openMaps": "Открыть в Google Maps",
+    "share": "Поделиться",
+    "noImage": "Есть фото этого места? Добавь его!",
+    "addImage": "Добавить фото",
+    "practical": "Практическая информация",
+    "comments": "Комментарии"
+  },
+  "weather": {
+    "now": "Сейчас",
+    "week": "7 дней",
+    "feelsLike": "ощущается как",
+    "wind": "Ветер",
+    "humidity": "Влажность",
+    "today": "Сегодня",
+    "tomorrow": "Завтра"
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "back": "Назад",
+    "readMore": "Посетить сайт ↗",
+    "noResults": "Нет результатов",
+    "filter": "Фильтр",
+    "all": "Все"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "nav": {
+    "home": "首页",
+    "fishing": "钓鱼",
+    "hunting": "打猎",
+    "kayak": "皮划艇与湖泊",
+    "camping": "露营",
+    "hiking": "徒步旅行",
+    "reserves": "自然保护区",
+    "news": "新闻",
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出",
+    "propose": "添加地点",
+    "admin": "管理面板",
+    "search": "搜索",
+    "language": "语言"
+  },
+  "home": {
+    "heroTitle": "寻找完美的户外",
+    "heroTitle2": "目的地",
+    "heroSubtitle": "巴尔干地区数千个钓鱼、狩猎、露营和徒步旅行地点。",
+    "searchPlaceholder": "搜索地点、河流、山脉...",
+    "searchBtn": "搜索",
+    "advanced": "高级搜索",
+    "statsLocations": "地点",
+    "statsCategories": "类别",
+    "statsCountries": "国家",
+    "statsWeather": "天气预报",
+    "categoriesTitle": "按类别浏览",
+    "categoriesSubtitle": "选择你的户外活动",
+    "featuredTitle": "推荐地点",
+    "recentTitle": "最新地点",
+    "ctaTitle": "知道好地方吗？",
+    "ctaBtn": "添加地点",
+    "ctaBtn2": "社区建议"
+  },
+  "location": {
+    "season": "季节",
+    "permit": "许可证",
+    "permitRequired": "需要许可证",
+    "gps": "GPS位置",
+    "openMaps": "在Google地图中打开",
+    "share": "分享",
+    "noImage": "有这个地方的照片吗？添加它！",
+    "addImage": "添加照片",
+    "practical": "实用信息",
+    "comments": "评论"
+  },
+  "weather": {
+    "now": "现在",
+    "week": "7天",
+    "feelsLike": "体感",
+    "wind": "风速",
+    "humidity": "湿度",
+    "today": "今天",
+    "tomorrow": "明天"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "save": "保存",
+    "cancel": "取消",
+    "back": "返回",
+    "readMore": "访问网站 ↗",
+    "noResults": "无结果",
+    "filter": "筛选",
+    "all": "全部"
+  }
+}

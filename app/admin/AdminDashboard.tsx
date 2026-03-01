@@ -1,0 +1,442 @@
+'use client'
+
+import { useState, useRef } from 'react'
+import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+
+interface Props {
+  user: any; countries: any[]; categories: any[]; regions: any[]; locations: any[]
+}
+
+function nameToSlug(name: string) {
+  return name.toLowerCase()
+    .replace(/[čć]/g, 'c').replace(/[šđ]/g, 's').replace(/ž/g, 'z')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+function parseCSV(text: string): Record<string, string>[] {
+  const lines = text.trim().split('\n').filter(l => l.trim())
+  if (lines.length < 2) return []
+  const sep = lines[0].includes(';') ? ';' : ','
+  const headers = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g, ''))
+  return lines.slice(1).map(line => {
+    const vals = line.split(sep).map(v => v.trim().replace(/^"|"$/g, ''))
+    return Object.fromEntries(headers.map((h, i) => [h, vals[i] ?? '']))
+  })
+}
+
+const EMPTY = {
+  name: '', slug: '', short_description: '', description: '',
+  country_id: '', region_id: '', category_id: '', lat: '', lng: '',
+  meta_title: '', meta_description: '', best_season: '',
+  permit_required: false, permit_info: '', access_notes: '', is_published: true,
+}
+
+export default function AdminDashboard({ user, countries, categories, regions, locations }: Props) {
+  const router = useRouter()
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) window.location.href = '/admin/login'
+    })
+  }, [])
+  type Tab = 'locations' | 'add' | 'csv'
+  const [tab, setTab] = useState<Tab>('locations')
+  const [form, setForm] = useState({ ...EMPTY })
+  const [saving, setSaving] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiMsg, setAiMsg] = useState('')
+  const [csvRows, setCsvRows] = useState<Record<string, string>[]>([])
+  const [csvMsg, setCsvMsg] = useState('')
+  const [csvImporting, setCsvImporting] = useState(false)
+  const [csvErrors, setCsvErrors] = useState<string[]>([])
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const ic = `w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white`
+  const lc = `block text-sm font-medium text-gray-700 mb-1`
+
+  async function handleAIGenerate() {
+    if (!form.name.trim()) { setAiMsg('❌ Upiši naziv lokacije prvo!'); return }
+    const cat = categories.find(c => c.id === parseInt(form.category_id))
+    const ctr = countries.find(c => c.id === parseInt(form.country_id))
+    const reg = regions.find(r => r.id === parseInt(form.region_id))
+    setAiLoading(true); setAiMsg('🤖 AI generiše sadržaj...')
+    try {
+      const res = await fetch('/api/ai-generate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, category: cat?.slug ?? 'ribolov', country: ctr?.name ?? 'Srbija', region: reg?.name ?? '' }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) throw new Error(json.error ?? 'Greška')
+      const d = json.data
+      setForm(f => ({ ...f,
+        short_description: d.short_description ?? f.short_description,
+        description: d.description ?? f.description,
+        meta_title: d.meta_title ?? f.meta_title,
+        meta_description: d.meta_description ?? f.meta_description,
+        best_season: d.best_season ?? f.best_season,
+        permit_required: d.permit_required ?? f.permit_required,
+        permit_info: d.permit_info ?? f.permit_info,
+      }))
+      setAiMsg('✅ AI popunio polja! Proveri i izmeni po potrebi.')
+    } catch (err: any) {
+      setAiMsg(`❌ ${err.message}`)
+    } finally { setAiLoading(false) }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault(); setSaving(true); setMsg('')
+    if (!form.lat || !form.lng) { setMsg('❌ GPS koordinate su obavezne!'); setSaving(false); return }
+    const { error } = await supabase.rpc('insert_location_with_coords', {
+      p_name: form.name, p_slug: form.slug || nameToSlug(form.name),
+      p_short_description: form.short_description, p_description: form.description,
+      p_country_id: parseInt(form.country_id), p_region_id: form.region_id ? parseInt(form.region_id) : null,
+      p_category_id: parseInt(form.category_id), p_lng: parseFloat(form.lng), p_lat: parseFloat(form.lat),
+      p_meta_title: form.meta_title || `${form.name} | OutdoorBalkans`,
+      p_meta_description: form.meta_description || form.short_description,
+      p_best_season: form.best_season || null, p_permit_required: form.permit_required,
+      p_permit_info: form.permit_info || null, p_access_notes: form.access_notes || null, p_is_published: form.is_published,
+    })
+    if (error) { setMsg(`❌ Greška: ${error.message}`) }
+    else { setMsg('✅ Lokacija uspešno dodata!'); setForm({ ...EMPTY }); setAiMsg(''); router.refresh() }
+    setSaving(false)
+  }
+
+  function handleCSVFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => {
+      const rows = parseCSV(ev.target?.result as string)
+      setCsvRows(rows)
+      setCsvMsg(rows.length > 0 ? `✅ Učitano ${rows.length} redova. Proveri preview pa klikni Import.` : '❌ Prazan ili pogrešan format.')
+      setCsvErrors([])
+    }
+    reader.readAsText(file)
+  }
+
+  async function handleCSVImport() {
+    if (!csvRows.length) return
+    setCsvImporting(true); setCsvMsg('⏳ Importujem...'); setCsvErrors([])
+    const res = await fetch('/api/csv-import', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locations: csvRows }),
+    })
+    const data = await res.json()
+    setCsvMsg(`✅ ${data.success} lokacija importovano. ${data.failed > 0 ? `❌ ${data.failed} grešaka.` : ''}`)
+    if (data.errors?.length) setCsvErrors(data.errors)
+    if (data.success > 0) { setCsvRows([]); router.refresh() }
+    setCsvImporting(false)
+  }
+
+  function downloadTemplate() {
+    const header = 'name;slug;lat;lng;category_slug;country_slug;region_name;short_description;best_season;permit_required;permit_info;access_notes'
+    const rows = [
+      'Uvac Kanjon;uvac-kanjon;43.4512;19.8934;ribolov;srbija;Zlatibor;Spektakularni kanjon sa bogatim ribolovom;April — Oktobar;true;Ribolovačka dozvola JVP Srbijavode;Asfaltnim putem do Kokin Broda',
+      'Vlasinska Jezero;vlasinska-jezero;42.7234;22.3456;ribolov;srbija;Pčinja;Veštačko jezero bogato šaranom i štukama;Maj — Septembar;false;;Parking na obali',
+      'Fruška Gora — Lov;fruska-gora-lov;45.1234;19.7890;lov;srbija;Srem;Lovište na Fruškoj Gori;Oktobar — Februar;true;Lovačka dozvola LD Vojvodina;Pristup šumskim putevima',
+    ].join('\n')
+    const blob = new Blob([header + '\n' + rows], { type: 'text/csv;charset=utf-8;' })
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'outdoorbalkans-template.csv' })
+    a.click()
+  }
+
+  async function togglePublish(id: number, current: boolean) {
+    await supabase.from('locations').update({ is_published: !current }).eq('id', id)
+    router.refresh()
+  }
+
+  const TABS: { id: Tab; label: string }[] = [
+    { id: 'locations', label: `📋 Lokacije (${locations.length})` },
+    { id: 'add', label: '✨ Dodaj + AI' },
+    { id: 'csv', label: '📥 CSV Import' },
+  ]
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-green-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-3">
+          <span className="text-xl">🏔️</span>
+          <span className="font-bold">Admin Panel</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-green-300 text-sm hidden sm:block">{user.email}</span>
+          <a href="/" target="_blank" className="text-green-300 text-sm hover:text-white hidden sm:block">Vidi sajt →</a>
+          <button onClick={async () => { await supabase.auth.signOut(); router.push('/admin/login') }}
+            className="bg-green-800 hover:bg-green-700 text-white text-sm px-3 py-1.5 rounded-lg">
+            Odjavi se
+          </button>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex gap-2 mb-8 flex-wrap">
+          {TABS.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-colors
+                ${tab === t.id ? 'bg-green-700 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-700 hover:border-green-300'}`}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'locations' && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Naziv</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Kat.</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Država</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
+                    <th className="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {locations.map((loc: any) => (
+                    <tr key={loc.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 font-medium text-gray-800">{loc.name}</td>
+                      <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{loc.categories?.icon} {loc.categories?.name}</td>
+                      <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{loc.countries?.name}</td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => togglePublish(loc.id, loc.is_published)}
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors
+                            ${loc.is_published ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                          {loc.is_published ? '✅ Objavljeno' : '⏸️ Skriveno'}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        {loc.countries?.slug && loc.categories?.slug && (
+                          <a href={`/${loc.countries.slug}/${loc.categories.slug}/${loc.slug}`} target="_blank"
+                            className="text-green-600 hover:text-green-800 text-xs font-medium">Vidi →</a>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!locations.length && <div className="text-center py-12 text-gray-400">Još nema lokacija.</div>}
+            </div>
+          </div>
+        )}
+
+        {tab === 'add' && (
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
+            <h2 className="text-xl font-bold text-gray-800 mb-1">Dodaj Novu Lokaciju</h2>
+            <p className="text-gray-500 text-sm mb-6">Upiši naziv + odaberi kategoriju i državu → klikni AI dugme za automatski opis.</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="md:col-span-2">
+                <label className={lc}>Naziv lokacije *</label>
+                <input value={form.name} required className={ic} placeholder="npr. Uvac Kanjon"
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value, slug: nameToSlug(e.target.value) }))} />
+              </div>
+              <div>
+                <label className={lc}>Kategorija *</label>
+                <select value={form.category_id} required className={ic} onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))}>
+                  <option value="">— Odaberi —</option>
+                  {categories.map((c: any) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={lc}>Država *</label>
+                <select value={form.country_id} required className={ic} onChange={e => setForm(f => ({ ...f, country_id: e.target.value, region_id: '' }))}>
+                  <option value="">— Odaberi —</option>
+                  {countries.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={lc}>Region</label>
+                <select value={form.region_id} className={ic} onChange={e => setForm(f => ({ ...f, region_id: e.target.value }))}>
+                  <option value="">— Odaberi —</option>
+                  {regions.filter((r: any) => !form.country_id || r.country_id === parseInt(form.country_id))
+                    .map((r: any) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={lc}>URL Slug</label>
+                <input value={form.slug} className={ic} placeholder="auto-generisan"
+                  onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} />
+              </div>
+
+              <div className="md:col-span-2 bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <p className="text-sm font-semibold text-blue-900 mb-3">🗺️ GPS Koordinate * — Google Maps → desni klik → kopiraj</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={lc}>Latitude (prva)</label>
+                    <input value={form.lat} required type="number" step="any" className={ic} placeholder="44.9333"
+                      onChange={e => setForm(f => ({ ...f, lat: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className={lc}>Longitude (druga)</label>
+                    <input value={form.lng} required type="number" step="any" className={ic} placeholder="19.5667"
+                      onChange={e => setForm(f => ({ ...f, lng: e.target.value }))} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <div className="flex items-center gap-3 p-4 bg-purple-50 border border-purple-100 rounded-xl">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-purple-900">🤖 AI Asistent</p>
+                    <p className="text-xs text-purple-600 mt-0.5">Automatski popunjava opis, SEO, sezonu i dozvole</p>
+                  </div>
+                  <button type="button" onClick={handleAIGenerate} disabled={aiLoading}
+                    className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-60 shrink-0 flex items-center gap-2">
+                    {aiLoading ? <><span className="animate-spin inline-block">⏳</span> Generiše...</> : '✨ AI Generiši'}
+                  </button>
+                </div>
+                {aiMsg && (
+                  <p className={`text-sm mt-2 px-3 py-2 rounded-lg ${aiMsg.startsWith('✅') ? 'bg-green-50 text-green-800' : aiMsg.startsWith('❌') ? 'bg-red-50 text-red-800' : 'bg-blue-50 text-blue-800'}`}>
+                    {aiMsg}
+                  </p>
+                )}
+              </div>
+
+              <div className="md:col-span-2">
+                <label className={lc}>Kratki opis * (max 200 znakova)</label>
+                <textarea value={form.short_description} required rows={2} maxLength={200} className={ic} placeholder="AI će popuniti..."
+                  onChange={e => setForm(f => ({ ...f, short_description: e.target.value }))} />
+                <p className="text-xs text-gray-400 mt-1">{form.short_description.length}/200</p>
+              </div>
+              <div className="md:col-span-2">
+                <label className={lc}>Pun opis</label>
+                <textarea value={form.description} rows={4} className={ic} placeholder="AI će popuniti..."
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div>
+                <label className={lc}>Sezona</label>
+                <input value={form.best_season} className={ic} placeholder="April — Oktobar"
+                  onChange={e => setForm(f => ({ ...f, best_season: e.target.value }))} />
+              </div>
+              <div className="flex items-center gap-3 mt-6">
+                <input type="checkbox" id="permit" checked={form.permit_required} className="w-4 h-4 accent-green-600"
+                  onChange={e => setForm(f => ({ ...f, permit_required: e.target.checked }))} />
+                <label htmlFor="permit" className="text-sm font-medium text-gray-700 cursor-pointer">Dozvola je obavezna</label>
+              </div>
+              {form.permit_required && (
+                <div className="md:col-span-2">
+                  <label className={lc}>Info o dozvoli</label>
+                  <input value={form.permit_info} className={ic} placeholder="Gde se nabavlja..."
+                    onChange={e => setForm(f => ({ ...f, permit_info: e.target.value }))} />
+                </div>
+              )}
+              <div className="md:col-span-2">
+                <label className={lc}>Pristup</label>
+                <input value={form.access_notes} className={ic} placeholder="Kako se dolazi do lokacije..."
+                  onChange={e => setForm(f => ({ ...f, access_notes: e.target.value }))} />
+              </div>
+              <div className="md:col-span-2 flex items-center gap-2">
+                <input type="checkbox" id="pub" checked={form.is_published} className="w-4 h-4 accent-green-600"
+                  onChange={e => setForm(f => ({ ...f, is_published: e.target.checked }))} />
+                <label htmlFor="pub" className="text-sm font-medium text-gray-700 cursor-pointer">Odmah objavi</label>
+              </div>
+            </div>
+
+            {msg && (
+              <div className={`mt-4 p-3 rounded-xl text-sm ${msg.startsWith('✅') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                {msg}
+              </div>
+            )}
+            <div className="flex gap-3 mt-6">
+              <button type="submit" disabled={saving}
+                className="bg-green-700 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-800 disabled:opacity-60">
+                {saving ? '⏳ Čuvam...' : '💾 Sačuvaj Lokaciju'}
+              </button>
+              <button type="button" onClick={() => { setForm({ ...EMPTY }); setMsg(''); setAiMsg('') }}
+                className="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-200">
+                Resetuj
+              </button>
+            </div>
+          </form>
+        )}
+
+        {tab === 'csv' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">📥 CSV Import</h2>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
+                <p className="text-sm font-semibold text-amber-800 mb-2">Kako funkcioniše:</p>
+                <ol className="text-sm text-amber-700 space-y-1 list-decimal list-inside">
+                  <li>Preuzmi CSV template ispod</li>
+                  <li>Otvori u Excelu ili Google Sheets</li>
+                  <li>Popuni lokacije (GPS sa Google Maps)</li>
+                  <li>Sačuvaj kao CSV sa ; separatorom</li>
+                  <li>Uploaduj i klikni Import</li>
+                </ol>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs">
+                <div>
+                  <p className="font-semibold text-gray-600 mb-1">Obavezno:</p>
+                  {['name','lat','lng','category_slug','country_slug'].map(c => (
+                    <span key={c} className="block bg-red-100 text-red-700 font-mono px-2 py-0.5 rounded mb-1">{c}</span>
+                  ))}
+                </div>
+                <div className="col-span-1 sm:col-span-3">
+                  <p className="font-semibold text-gray-600 mb-1">Opciono:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {['slug','region_name','short_description','description','best_season','permit_required','permit_info','access_notes'].map(c => (
+                      <span key={c} className="bg-gray-100 text-gray-600 font-mono px-2 py-0.5 rounded">{c}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                <button onClick={downloadTemplate}
+                  className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700">
+                  ⬇️ Preuzmi Template
+                </button>
+                <label className="flex items-center gap-2 bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-800 cursor-pointer">
+                  📂 Učitaj CSV
+                  <input ref={fileRef} type="file" accept=".csv,.txt" onChange={handleCSVFile} className="hidden" />
+                </label>
+              </div>
+              {csvMsg && (
+                <p className={`mt-4 p-3 rounded-xl text-sm ${csvMsg.startsWith('✅') ? 'bg-green-50 text-green-800 border border-green-200' : csvMsg.startsWith('❌') ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-blue-50 text-blue-800 border border-blue-200'}`}>
+                  {csvMsg}
+                </p>
+              )}
+              {csvErrors.length > 0 && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-xs font-semibold text-red-700 mb-2">Greške:</p>
+                  <ul className="text-xs text-red-600 space-y-1">{csvErrors.map((e, i) => <li key={i}>• {e}</li>)}</ul>
+                </div>
+              )}
+            </div>
+
+            {csvRows.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                  <div>
+                    <h3 className="font-bold text-gray-800">Preview — {csvRows.length} lokacija</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">Proveri podatke pre importa</p>
+                  </div>
+                  <button onClick={handleCSVImport} disabled={csvImporting}
+                    className="bg-green-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-green-800 disabled:opacity-60 flex items-center gap-2">
+                    {csvImporting ? '⏳ Importujem...' : `🚀 Importuj ${csvRows.length} lokacija`}
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-50">
+                      <tr>{Object.keys(csvRows[0]).map(h => <th key={h} className="text-left px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">{h}</th>)}</tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {csvRows.slice(0, 10).map((row, i) => (
+                        <tr key={i} className="hover:bg-gray-50">
+                          {Object.values(row).map((val, j) => <td key={j} className="px-3 py-2 text-gray-700 max-w-xs truncate">{val as string}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {csvRows.length > 10 && <p className="text-xs text-gray-400 text-center py-3">+{csvRows.length - 10} redova...</p>}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
