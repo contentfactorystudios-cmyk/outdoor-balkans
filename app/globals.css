@@ -124,3 +124,40 @@ body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--cream); 
 @media (min-width: 900px) {
   .login-photo { display: block !important; }
 }
+
+/* === MOBILE NAV === */
+@media (max-width: 767px) {
+  .desktop-nav  { display: none !important; }
+  .mob-menu-btn { display: flex !important; }
+}
+@media (min-width: 768px) {
+  .desktop-nav  { display: flex !important; }
+  .mob-menu-btn { display: none !important; }
+  .mob-drawer   { display: none !important; }
+}
+/* Kategorije mob scroll */
+@media (max-width: 767px) {
+  .cat-scroll { justify-content: flex-start !important; }
+}
+/* Social dugmad — ne blokiraj sadržaj na mob */
+@media (max-width: 767px) {
+  .social-float { display: none !important; }
+}
+
+/* === MOB/DESK NAV === */
+@media (max-width: 767px) {
+  .desk-nav  { display: none !important; }
+  .mob-ham   { display: flex !important; }
+  .mob-drawer { display: block !important; }
+}
+@media (min-width: 768px) {
+  .desk-nav  { display: flex !important; }
+  .mob-ham   { display: none !important; }
+  .mob-drawer { display: none !important; }
+}
+/* Cat scroll mob */
+@media (max-width: 767px) {
+  .cat-scroll { justify-content: flex-start !important; }
+}
+/* Hover card */
+.loc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.1) !important; }

@@ -6,8 +6,8 @@ import GearCarousel from '@/components/GearCarousel'
 
 const CAT: Record<string, { photo: string; hero: string; color: string }> = {
   ribolov:      { color: '#1d5fa8',
-    photo: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop&q=80',
-    hero:  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&q=85' },
+    photo: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop&q=80',
+    hero:  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&h=1080&fit=crop&q=85' },
   lov:          { color: '#5a3010',
     photo: 'https://images.unsplash.com/photo-1484406566174-9da000fda645?w=300&h=300&fit=crop&q=80',
     hero:  'https://images.unsplash.com/photo-1484406566174-9da000fda645?w=1920&h=1080&fit=crop&q=85' },
@@ -85,7 +85,7 @@ export default async function HomePage() {
             color: '#0e1a0e', marginBottom: '36px', textAlign: 'center' }}>
             Istraži po aktivnosti
           </h2>
-          <div style={{ display: 'flex', overflowX: 'auto', gap: '24px', paddingBottom: '8px',
+          <div className='cat-scroll' style={{ display: 'flex', overflowX: 'auto', gap: '24px', paddingBottom: '8px',
             scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
             justifyContent: 'center', flexWrap: 'nowrap' }}>
             {cats.map((cat: any) => {
@@ -136,7 +136,7 @@ export default async function HomePage() {
       <LocationsNearby catData={CAT} />
 
       {/* NAJNOVIJE LOKACIJE */}
-      {locs.length > 0 && (
+      {(
         <section style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '36px' }}>
             <p style={{ color: '#8fa68f', fontSize: '0.78rem', fontWeight: 700,
@@ -164,9 +164,16 @@ export default async function HomePage() {
                     border: '1px solid #f0ede6', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
                     <div style={{ height: '200px', overflow: 'hidden', position: 'relative',
                       background: cp?.color ?? '#2d6a2d' }}>
-                      {loc.image_url
-                        ? <img src={loc.image_url} alt={loc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : cp?.photo ? <img src={cp.photo} alt={loc.name} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} /> : null}
+                      {(() => {
+                        const src = loc.image_url || (Array.isArray(loc.image_urls) && loc.image_urls[0])
+                        return src
+                          ? <img src={src} alt={loc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <div style={{ width: '100%', height: '100%',
+                              background: `linear-gradient(135deg, ${cp?.color ?? '#2d6a2d'}cc 0%, ${cp?.color ?? '#2d6a2d'}66 100%)`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>
+                              {loc.categories?.icon ?? '🗺️'}
+                            </div>
+                      })()}
                       <div style={{ position: 'absolute', inset: 0,
                         background: 'linear-gradient(to top,rgba(0,0,0,0.4) 0%,transparent 55%)' }} />
                       <div style={{ position: 'absolute', bottom: '10px', left: '10px',

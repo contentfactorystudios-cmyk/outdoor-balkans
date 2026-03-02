@@ -17,10 +17,10 @@ export default function LocationsNearby({ catData }: Props) {
     fetch('https://ipapi.co/json/')
       .then(r => r.json())
       .then(d => {
-        const c = d.city || d.region || 'Srbije'
+        const c = d.city || d.region || 'Beograda'
         setCity(c)
       })
-      .catch(() => setCity('Srbije'))
+      .catch(() => setCity('Beograda'))
 
     // Dohvati lokacije (najbliže — po created_at za sada, PostGIS u v2)
     supabase
@@ -47,7 +47,7 @@ export default function LocationsNearby({ catData }: Props) {
           </p>
           <h2 style={{ fontFamily: "'Fraunces','Playfair Display',Georgia,serif",
             fontSize: 'clamp(1.4rem,2.5vw,1.9rem)', fontWeight: 700, color: '#0e1a0e', marginBottom: '8px' }}>
-            {loading ? 'Učitavam lokacije...' : `Local favorites near ${city}`}
+            {loading ? 'Učitavam lokacije...' : `Preporučeno u blizini — ${city}`}
           </h2>
           <Link href='/pretraga' style={{ fontSize: '0.88rem', fontWeight: 600,
             color: '#2d6a2d', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -86,10 +86,11 @@ export default function LocationsNearby({ catData }: Props) {
                       {loc.image_url
                         ? <img src={loc.image_url} alt={loc.name}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : cp?.photo
-                          ? <img src={cp.photo} alt={loc.name}
-                              style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} />
-                          : null
+                        : <div style={{ width: '100%', height: '100%',
+                              background: `linear-gradient(135deg, ${cp?.color ?? '#2d6a2d'}cc 0%, ${cp?.color ?? '#2d6a2d'}66 100%)`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>
+                              {loc.categories?.icon ?? '🗺️'}
+                            </div>
                       }
                       <div style={{ position: 'absolute', inset: 0,
                         background: 'linear-gradient(to top,rgba(0,0,0,0.4) 0%,transparent 55%)' }} />
