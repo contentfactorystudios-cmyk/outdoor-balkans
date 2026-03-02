@@ -1,15 +1,28 @@
 // weather-added
 import { getLocationBySlug, extractCoordinates } from '@/lib/queries'
-import { getUnsplashPhoto } from '@/lib/unsplash'
-import ShareButtons  from '@/components/ShareButtons'
-import ReactionsBar  from '@/components/ReactionsBar'
-import WeatherWidget from '@/components/WeatherWidget'
+import { getLocationPhoto } from '@/lib/getLocationPhoto'
+import ShareButtons    from '@/components/ShareButtons'
+import ReactionsBar    from '@/components/ReactionsBar'
+import WeatherWidget   from '@/components/WeatherWidget'
 import CommentsSection from '@/components/CommentsSection'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const revalidate = 86400
+
+const SERIF = "'Fraunces','Playfair Display',Georgia,serif"
+const SANS  = "'DM Sans',system-ui,sans-serif"
+
+const CAT_META: Record<string, { color: string; icon: string; label: string }> = {
+  ribolov:             { color: '#1d5fa8', icon: '🎣', label: 'Ribolov' },
+  lov:                 { color: '#5a3010', icon: '🦌', label: 'Lov' },
+  kajak:               { color: '#0e7490', icon: '🚣', label: 'Kajak' },
+  kampovanje:          { color: '#166534', icon: '⛺', label: 'Kampovanje' },
+  planinarenje:        { color: '#5b21b6', icon: '🥾', label: 'Planinarenje' },
+  'nacionalni-parkovi':{ color: '#0f766e', icon: '🦋', label: 'Nacionalni parkovi' },
+  rezervati:           { color: '#0f766e', icon: '🦋', label: 'Nacionalni parkovi' },
+}
 
 interface Props {
   params: Promise<{ country: string; category: string; slug: string }>
@@ -18,145 +31,353 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { country, category, slug } = await params
+    const location = await getLocationBySlug(country, category, slug)
+    if (!location) return {}
+    return {
+      title:       location.meta_title       ?? location.name,
+      description: location.meta_description ?? location.short_description ?? '',
+      openGraph: {
+        title:       location.meta_title       ?? location.name,
+        description: location.meta_description ?? location.short_description ?? '',
+        images:      location.image_url ? [{ url: location.image_url }] : [],
+      },
+    }
+  } catch { return {} }
+}
+
+export default async function LocationPage({ params }: Props) {
+  const { country, category: rawCategory, slug } = await params
+  if (rawCategory === 'rezervati') redirect('/srbija/nacionalni-parkovi/' + slug)
+  const category = rawCategory
+
   const location = await getLocationBySlug(country, category, slug)
   if (!location) notFound()
 
-  const coords = extractCoordinates(location.coordinates)
-  const lat    = coords?.lat ?? 0
-  const lng    = coords?.lng ?? 0
-  const loc    = location as any
+  const coords  = extractCoordinates(location.coordinates)
+  const pageUrl = `https://outdoorbalkans.com/${country}/${category}/${slug}`
+  const lat     = coords?.lat ?? 0
+  const lng     = coords?.lng ?? 0
+  const catMeta = CAT_META[category] ?? { color: '#2d6a2d', icon: '📍', label: category }
 
-  const catName     = loc.categories?.name ?? category
-  const catIcon     = loc.categories?.icon ?? '📍'
-  const countryName = loc.countries?.name  ?? country
-  const region      = loc.regions?.name    ?? ''
+  // Hero slika — pokušaj Wikipedia/Commons/Mapbox/Category
+  const photoResult = await getLocationPhoto({
+    imageUrl: location.image_url,
+    locationName: location.name,
+    category,
+    lat: coords?.lat,
+    lng: coords?.lng,
+  })
+  const heroImg = photoResult.url
 
-  let heroImage   = location.image_url
-  let imageCredit = null as string | null
-  if (!heroImage) {
-    const u = await getUnsplashPhoto(category, countryName)
-    heroImage   = u.url
-    imageCredit = u.credit
-  }
-
-  const pageUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://outdoorbalkans.com'}/${country}/${category}/${slug}`
-
-  const jsonLd = {
-    '@context': 'https://schema.org', '@type': 'TouristAttraction',
-    name: location.name, description: location.short_description ?? location.description,
-    geo: { '@type': 'GeoCoordinates', latitude: lat, longitude: lng },
-    address: { '@type': 'PostalAddress', addressCountry: loc.countries?.code ?? '', addressRegion: region },
-    url: pageUrl, ...(heroImage && { image: heroImage }),
-  }
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
 
   return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <main className="max-w-4xl mx-auto px-4 py-8">
+    <div style={{ fontFamily: SANS, background: '#fff', minHeight: '100vh' }}>
+
+      {/* ═══ HERO ═══ */}
+      <section style={{ position: 'relative', height: '62vh', minHeight: '420px', overflow: 'hidden' }}>
+        {heroImg ? (
+          <img src={heroImg} alt={location.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }} />
+        ) : (
+          <div style={{ width: '100%', height: '100%',
+            background: `linear-gradient(135deg, ${catMeta.color}ee 0%, ${catMeta.color}88 100%)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6rem' }}>
+            {catMeta.icon}
+          </div>
+        )}
+
+        {/* Overlay */}
+        <div style={{ position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.72) 100%)' }} />
 
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-6 flex-wrap">
-          <Link href="/" className="hover:text-green-700">Početna</Link>
-          <span className="text-gray-300">/</span>
-          <Link href={`/${country}`} className="hover:text-green-700">{countryName}</Link>
-          <span className="text-gray-300">/</span>
-          <Link href={`/${country}/${category}`} className="hover:text-green-700">{catName}</Link>
-          <span className="text-gray-300">/</span>
-          <span className="text-gray-800 font-medium truncate max-w-xs">{location.name}</span>
-        </nav>
-
-        {/* Hero slika */}
-        {heroImage && (
-          <div className="relative w-full h-72 sm:h-96 rounded-2xl overflow-hidden mb-8 shadow-lg">
-            <img src={heroImage} alt={location.name} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <h1 className="text-2xl sm:text-4xl font-bold text-white leading-tight drop-shadow-lg">
-                {location.name}
-              </h1>
-            </div>
-            {imageCredit && (
-              <div className="absolute top-3 right-3 bg-black/40 text-white/80 text-xs px-2 py-1 rounded-lg backdrop-blur-sm">
-                📷 {imageCredit}
-              </div>
-            )}
-          </div>
-        )}
-        {!heroImage && <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">{location.name}</h1>}
-
-        {/* Tagovi */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-50 text-blue-800 border border-blue-100">{catIcon} {catName}</span>
-          {region && <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700">📍 {region}, {countryName}</span>}
-          {location.best_season && <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-green-50 text-green-800 border border-green-100">📅 {location.best_season}</span>}
-          {location.permit_required
-            ? <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-yellow-50 text-yellow-800 border border-yellow-100">⚠️ Dozvola obavezna</span>
-            : <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-green-50 text-green-700 border border-green-100">✅ Bez dozvole</span>
-          }
+        <div style={{ position: 'absolute', top: '80px', left: '24px', right: '24px',
+          display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <Link href='/' style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.8rem',
+            textDecoration: 'none', fontWeight: 500 }}>Početna</Link>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>›</span>
+          <Link href={`/srbija/${category}`} style={{ color: 'rgba(255,255,255,0.75)',
+            fontSize: '0.8rem', textDecoration: 'none', fontWeight: 500 }}>
+            {catMeta.icon} {catMeta.label}
+          </Link>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>›</span>
+          <span style={{ color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}>{location.name}</span>
         </div>
 
-        {location.description && (
-          <p className="text-gray-700 text-lg leading-relaxed mb-8">{location.description}</p>
-        )}
-
-        {/* Info grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-            <h2 className="font-bold text-gray-800 mb-4">📋 Praktične Informacije</h2>
-            <ul className="space-y-3 text-sm">
-              {location.best_season && (
-                <li className="flex gap-3"><span className="text-gray-500 w-20 shrink-0">📅 Sezona</span><span className="text-gray-800 font-medium">{location.best_season}</span></li>
-              )}
-              {loc.access_notes && (
-                <li className="flex gap-3"><span className="text-gray-500 w-20 shrink-0">🚗 Pristup</span><span className="text-gray-800">{loc.access_notes}</span></li>
-              )}
-              <li className="flex gap-3">
-                <span className="text-gray-500 w-20 shrink-0">📋 Dozvola</span>
-                {location.permit_required
-                  ? <span className="text-gray-800">{loc.permit_info ?? 'Da — kontaktiraj lokalne vlasti'}</span>
-                  : <span className="text-green-700 font-medium">Nije potrebna</span>}
-              </li>
-            </ul>
+        {/* Title area */}
+        <div style={{ position: 'absolute', bottom: '36px', left: '24px', right: '24px',
+          maxWidth: '860px', margin: '0 auto' }}>
+          {/* Tags */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
+            <span style={{ background: catMeta.color, color: '#fff',
+              padding: '4px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700 }}>
+              {catMeta.icon} {catMeta.label}
+            </span>
+            {location.best_season && (
+              <span style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
+                color: '#fff', padding: '4px 12px', borderRadius: '999px',
+                fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(255,255,255,0.3)' }}>
+                🗓️ {location.best_season}
+              </span>
+            )}
+            {location.permit_required && (
+              <span style={{ background: 'rgba(255,165,0,0.35)', backdropFilter: 'blur(8px)',
+                color: '#fff', padding: '4px 12px', borderRadius: '999px',
+                fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(255,165,0,0.4)' }}>
+                ⚠️ Dozvola obavezna
+              </span>
+            )}
           </div>
 
-          {lat !== 0 && lng !== 0 && (
-            <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100">
-              <h2 className="font-bold text-gray-800 mb-4">🗺️ GPS Lokacija</h2>
-              <p className="font-mono text-blue-900 text-xl font-bold mb-1">{lat.toFixed(5)}, {lng.toFixed(5)}</p>
-              <p className="text-xs text-gray-500 mb-4">Latitude, Longitude · WGS84</p>
-              <a href={`https://www.google.com/maps/search/${encodeURIComponent(location.google_maps_query || location.name + ', Srbija')}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700">
-                📍 Otvori u Google Maps
-              </a>
-            </div>
+          <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(1.8rem,4vw,3.2rem)',
+            fontWeight: 900, color: '#fff', lineHeight: 1.15, marginBottom: '8px',
+            textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}>
+            {location.name}
+          </h1>
+
+          {location.regions?.name && (
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1rem', fontWeight: 500 }}>
+              📍 {location.regions.name}{location.countries?.name ? `, ${location.countries.name}` : ''}
+            </p>
           )}
         </div>
 
-        {/* Vremenska prognoza */}
-        {lat !== 0 && lng !== 0 && (
-          <WeatherWidget lat={lat} lng={lng} locationName={location.name} category={category} />
+        {/* Photo source badge */}
+        {photoResult.source !== 'location' && (
+          <div style={{ position: 'absolute', top: '80px', right: '24px',
+            background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)',
+            color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 500,
+            padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)' }}>
+            {photoResult.source === 'wikipedia' ? '📷 Wikipedia' :
+             photoResult.source === 'commons'   ? '📷 Wikimedia Commons' :
+             photoResult.source === 'mapbox'    ? '🛰️ Satelitski snimak' :
+             '📷 Kategorija'}
+          </div>
         )}
-
-        {/* Reakcije */}
-        <ReactionsBar locationId={location.id} />
-
-        {/* Share */}
-        <ShareButtons url={pageUrl} title={location.name} />
-
-        {/* Komentari */}
-        <CommentsSection locationId={location.id} />
-
-        {/* Nazad */}
-        <div className="mt-8 pt-6 border-t border-gray-100">
-          <Link href={`/${country}/${category}`}
-            className="inline-flex items-center gap-2 text-green-700 hover:text-green-900 font-medium text-sm">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Nazad na {catName}
-          </Link>
+        {/* Wave */}
+        <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0 }}>
+          <svg viewBox='0 0 1440 50' preserveAspectRatio='none'
+            style={{ display: 'block', width: '100%', height: '50px' }}>
+            <path d='M0 50 C360 10 1080 40 1440 20 L1440 50 Z' fill='#fff'/>
+          </svg>
         </div>
-      </main>
-    </>
+      </section>
+
+      {/* ═══ MAIN CONTENT ═══ */}
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px 80px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '40px',
+          alignItems: 'start' }} className='loc-grid'>
+
+          {/* LIJEVO — Sadržaj */}
+          <div>
+
+            {/* Share + Reactions */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '20px 0', borderBottom: '1px solid #f0ede6', marginBottom: '32px',
+              flexWrap: 'wrap', gap: '12px' }}>
+              <ReactionsBar locationId={location.id} />
+              <ShareButtons title={location.name} />
+            </div>
+
+            {/* Opis */}
+            {location.description && (
+              <div style={{ marginBottom: '40px' }}>
+                <h2 style={{ fontFamily: SERIF, fontSize: '1.3rem', fontWeight: 700,
+                  color: '#0e1a0e', marginBottom: '16px' }}>O lokaciji</h2>
+                <div style={{ fontSize: '1rem', color: '#3d4d3d', lineHeight: 1.8 }}
+                  dangerouslySetInnerHTML={{ __html: location.description }} />
+              </div>
+            )}
+
+            {/* Kratki opis ako nema puni */}
+            {!location.description && location.short_description && (
+              <div style={{ marginBottom: '40px', padding: '24px', borderRadius: '16px',
+                background: '#f9f7f2', border: '1px solid #f0ede6' }}>
+                <p style={{ fontSize: '1.05rem', color: '#3d4d3d', lineHeight: 1.8, margin: 0 }}>
+                  {location.short_description}
+                </p>
+              </div>
+            )}
+
+            {/* Praktične informacije */}
+            <div style={{ background: '#f9f7f2', borderRadius: '20px', padding: '28px',
+              marginBottom: '40px', border: '1px solid #f0ede6' }}>
+              <h2 style={{ fontFamily: SERIF, fontSize: '1.2rem', fontWeight: 700,
+                color: '#0e1a0e', marginBottom: '20px' }}>
+                📋 Praktične informacije
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))',
+                gap: '16px' }}>
+                {location.best_season && (
+                  <div style={{ background: '#fff', borderRadius: '12px', padding: '14px 16px',
+                    border: '1px solid #f0ede6' }}>
+                    <p style={{ fontSize: '0.7rem', color: '#8fa68f', fontWeight: 700,
+                      textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                      🗓️ Sezona
+                    </p>
+                    <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0e1a0e' }}>
+                      {location.best_season}
+                    </p>
+                  </div>
+                )}
+                {location.permit_info && (
+                  <div style={{ background: '#fff', borderRadius: '12px', padding: '14px 16px',
+                    border: '1px solid #f0ede6' }}>
+                    <p style={{ fontSize: '0.7rem', color: '#8fa68f', fontWeight: 700,
+                      textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                      📄 Dozvola
+                    </p>
+                    <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0e1a0e' }}>
+                      {location.permit_info}
+                    </p>
+                  </div>
+                )}
+                {location.difficulty && (
+                  <div style={{ background: '#fff', borderRadius: '12px', padding: '14px 16px',
+                    border: '1px solid #f0ede6' }}>
+                    <p style={{ fontSize: '0.7rem', color: '#8fa68f', fontWeight: 700,
+                      textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                      ⚡ Težina
+                    </p>
+                    <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0e1a0e' }}>
+                      {location.difficulty}
+                    </p>
+                  </div>
+                )}
+                {location.fish_species && (
+                  <div style={{ background: '#fff', borderRadius: '12px', padding: '14px 16px',
+                    border: '1px solid #f0ede6' }}>
+                    <p style={{ fontSize: '0.7rem', color: '#8fa68f', fontWeight: 700,
+                      textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                      🐟 Ribe
+                    </p>
+                    <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0e1a0e' }}>
+                      {location.fish_species}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Vreme */}
+            {lat !== 0 && (
+              <div style={{ marginBottom: '40px' }}>
+                <h2 style={{ fontFamily: SERIF, fontSize: '1.2rem', fontWeight: 700,
+                  color: '#0e1a0e', marginBottom: '16px' }}>
+                  🌤️ Vremenska prognoza
+                </h2>
+                <WeatherWidget lat={lat} lng={lng} category={category} />
+              </div>
+            )}
+
+            {/* Komentari */}
+            <div>
+              <h2 style={{ fontFamily: SERIF, fontSize: '1.2rem', fontWeight: 700,
+                color: '#0e1a0e', marginBottom: '20px' }}>
+                💬 Komentari zajednice
+              </h2>
+              <CommentsSection locationId={location.id} />
+            </div>
+          </div>
+
+          {/* DESNO — Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '28px' }}>
+
+            {/* GPS Lokacija */}
+            <div style={{ background: '#fff', borderRadius: '20px', padding: '22px',
+              border: '1px solid #f0ede6', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
+              <h3 style={{ fontFamily: SERIF, fontSize: '1.05rem', fontWeight: 700,
+                color: '#0e1a0e', marginBottom: '16px' }}>🧭 GPS Lokacija</h3>
+
+              {lat !== 0 ? (
+                <>
+                  <div style={{ background: '#f9f7f2', borderRadius: '12px', padding: '14px 16px',
+                    marginBottom: '14px', textAlign: 'center' }}>
+                    <p style={{ fontFamily: SERIF, fontSize: '1.3rem', fontWeight: 800,
+                      color: '#0e1a0e', letterSpacing: '0.02em' }}>
+                      {lat.toFixed(5)}, {lng.toFixed(5)}
+                    </p>
+                    <p style={{ fontSize: '0.72rem', color: '#8fa68f', marginTop: '4px',
+                      fontWeight: 500 }}>Latitude, Longitude · WGS84</p>
+                  </div>
+
+                  <a href={mapsUrl} target='_blank' rel='noopener noreferrer'
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      gap: '8px', background: '#1a73e8', color: '#fff', padding: '13px',
+                      borderRadius: '12px', textDecoration: 'none', fontWeight: 700,
+                      fontSize: '0.9rem', marginBottom: '10px' }}>
+                    📍 Otvori u Google Maps
+                  </a>
+
+                  <a href={`geo:${lat},${lng}`}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      gap: '8px', background: '#f9f7f2', color: '#0e1a0e', padding: '11px',
+                      borderRadius: '12px', textDecoration: 'none', fontWeight: 600,
+                      fontSize: '0.88rem', border: '1px solid #f0ede6' }}>
+                    🧭 Navigacija (GPS app)
+                  </a>
+                </>
+              ) : (
+                <p style={{ color: '#8fa68f', fontSize: '0.88rem' }}>
+                  GPS koordinate nisu dostupne.
+                </p>
+              )}
+            </div>
+
+            {/* Brzi pristup */}
+            <div style={{ background: `linear-gradient(135deg, ${catMeta.color}18 0%, ${catMeta.color}08 100%)`,
+              borderRadius: '20px', padding: '22px',
+              border: `1px solid ${catMeta.color}33` }}>
+              <h3 style={{ fontFamily: SERIF, fontSize: '1.05rem', fontWeight: 700,
+                color: '#0e1a0e', marginBottom: '16px' }}>⚡ Brzi pristup</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { href: `/srbija/${category}`, label: `Sve ${catMeta.label} lokacije`, icon: catMeta.icon },
+                  { href: '/pretraga', label: 'Pretraži lokacije', icon: '🔍' },
+                  { href: '/predlozi-lokaciju', label: 'Predloži lokaciju', icon: '📌' },
+                  { href: '/kalendar-aktivnosti', label: 'Kalendar aktivnosti', icon: '📅' },
+                ].map(item => (
+                  <Link key={item.href} href={item.href}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px',
+                      padding: '10px 14px', borderRadius: '12px', background: '#fff',
+                      textDecoration: 'none', border: '1px solid #f0ede6',
+                      fontSize: '0.86rem', fontWeight: 600, color: '#0e1a0e',
+                      transition: 'transform 0.15s' }}>
+                    <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+                    {item.label}
+                    <svg width='11' height='11' viewBox='0 0 24 24' fill='none'
+                      stroke='#ccc' strokeWidth='2' style={{ marginLeft: 'auto' }}>
+                      <path d='M9 18l6-6-6-6'/>
+                    </svg>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Prijavi grešku */}
+            <div style={{ borderRadius: '16px', padding: '16px 18px',
+              border: '1px solid #f0ede6', background: '#fafaf8' }}>
+              <p style={{ fontSize: '0.78rem', color: '#8fa68f', marginBottom: '8px' }}>
+                Informacije nisu tačne?
+              </p>
+              <Link href={`/kontakt?ref=${location.slug}`}
+                style={{ fontSize: '0.82rem', fontWeight: 600, color: '#2d6a2d',
+                  textDecoration: 'none' }}>
+                ✏️ Predloži izmenu →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 860px) {
+          .loc-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+    </div>
   )
 }

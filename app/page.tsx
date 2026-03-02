@@ -1,3 +1,4 @@
+import { getCardPhoto } from '@/lib/getCategoryPhoto'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import HeroSlider from '@/components/HeroSlider'

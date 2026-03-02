@@ -1,3 +1,4 @@
+import { getCardPhoto } from '@/lib/getCategoryPhoto'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -158,18 +159,10 @@ export default async function CategoryPage({
                   {/* Slika */}
                   <div style={{ height: '220px', overflow: 'hidden',
                     position: 'relative', background: meta.color }}>
-                    {loc.image_url ? (
-                      <img src={loc.image_url} alt={loc.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover',
-                          transition: 'transform 0.4s' }} />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%',
-                        background: `linear-gradient(135deg, ${meta.color}ee 0%, ${meta.color}77 100%)`,
-                        display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', fontSize: '4.5rem' }}>
-                        {meta.icon}
-                      </div>
-                    )}
+                    <img src={getCardPhoto(loc.slug, loc.image_url, slug)}
+                      alt={loc.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover',
+                        transition: 'transform 0.4s' }} />
                     <div style={{ position: 'absolute', inset: 0,
                       background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)' }} />
                     {/* Broj */}

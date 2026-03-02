@@ -1,177 +1,184 @@
 import { supabase } from '@/lib/supabase'
-import SearchFilters from './SearchFilters'
 import Link from 'next/link'
-import { Suspense } from 'react'
-import type { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title:       'Naprednа Pretraga — OutdoorBalkans',
-  description: 'Pronađi outdoor lokacije po kategoriji, državi, vrsti ribe i dozvolama.',
+const SERIF = "'Fraunces','Playfair Display',Georgia,serif"
+const SANS  = "'DM Sans',system-ui,sans-serif"
+
+const CAT_COLORS: Record<string, string> = {
+  ribolov:'#1d5fa8', lov:'#5a3010', kajak:'#0e7490',
+  kampovanje:'#166534', planinarenje:'#5b21b6',
+  'nacionalni-parkovi':'#0f766e', rezervati:'#0f766e'
 }
 
-interface Props {
-  searchParams: Promise<{
-    q?:       string
-    category?: string
-    country?:  string
-    permit?:   string
-    fish?:     string
-  }>
-}
+export default async function SearchPage({
+  searchParams
+}: { searchParams: Promise<{ q?: string; cat?: string; region?: string }> }) {
+  const { q = '', cat = '', region = '' } = await searchParams
 
-const GRADIENTS: Record<string, string> = {
-  ribolov: 'from-blue-400 to-cyan-500',
-  lov:     'from-amber-500 to-orange-600',
-}
-
-export default async function SearchPage({ searchParams }: Props) {
-  const p = await searchParams
-
-  // Filter opcije (uvek dohvati)
-  const [{ data: countries }, { data: categories }, { data: fish }] = await Promise.all([
-    supabase.from('countries').select('id,name,slug').eq('is_active', true).order('name'),
-    supabase.from('categories').select('id,name,slug,icon').eq('is_active', true),
-    supabase.from('fish_types').select('id,name,slug').order('name'),
-  ])
-
-  // Gradi query
   let query = supabase
     .from('locations')
-    .select(`
-      id, name, slug, short_description, image_url, permit_required, best_season,
-      categories(name, slug, icon),
-      countries(name, slug),
-      regions(name),
-      location_fish(fish_types(name, slug))
-    `)
+    .select('id,name,slug,short_description,image_url,categories(name,slug,icon),regions(name),countries(name,slug)')
     .eq('is_published', true)
-
-  if (p.q?.trim() && p.q.trim().length >= 2) {
-    const safe = p.q.trim().replace(/[%_\\]/g, '\\$&')
-    query = (query as any).or(`name.ilike.%${safe}%,short_description.ilike.%${safe}%`)
-  }
-
-  if (p.category) {
-    const { data: cat } = await supabase.from('categories').select('id').eq('slug', p.category).single()
-    if (cat) query = (query as any).eq('category_id', cat.id)
-  }
-
-  if (p.country) {
-    const { data: ctr } = await supabase.from('countries').select('id').eq('slug', p.country).single()
-    if (ctr) query = (query as any).eq('country_id', ctr.id)
-  }
-
-  if (p.permit === 'da') query = (query as any).eq('permit_required', true)
-  if (p.permit === 'ne') query = (query as any).eq('permit_required', false)
-
-  const { data: rawResults } = await (query as any)
     .order('is_featured', { ascending: false })
-    .limit(30)
+    .limit(48)
 
-  // Filter po ribi (many-to-many)
-  const results = p.fish
-    ? (rawResults ?? []).filter((loc: any) =>
-        loc.location_fish?.some((lf: any) => lf.fish_types?.slug === p.fish)
-      )
-    : (rawResults ?? [])
+  if (q) query = query.ilike('name', `%${q}%`)
+  if (region) query = query.eq('regions.name', region)
 
-  const hasFilters = p.q || p.category || p.country || p.permit || p.fish
+  const { data: results } = await query
+  const locs = (results ?? []) as any[]
+
+  const filtered = cat
+    ? locs.filter(l => l.categories?.slug === cat || (cat === 'nacionalni-parkovi' && l.categories?.slug === 'rezervati'))
+    : locs
+
+  const { data: categories } = await supabase
+    .from('categories').select('id,name,slug,icon').eq('is_active', true)
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">🔍 Naprednа Pretraga</h1>
+    <div style={{ fontFamily: SANS, background: '#f9f7f2', minHeight: '100vh' }}>
 
-      {/* Filteri — client komponenta */}
-      <Suspense fallback={<div className="h-40 bg-white rounded-2xl border animate-pulse mb-8" />}>
-        <SearchFilters
-          countries={countries ?? []}
-          categories={categories ?? []}
-          fish={fish ?? []}
-        />
-      </Suspense>
+      {/* HEADER */}
+      <div style={{ background: 'linear-gradient(135deg,#1e3d1e 0%,#2d6a2d 100%)',
+        padding: '80px 24px 40px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <p style={{ color: '#6ab87a', fontSize: '0.78rem', fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.16em', marginBottom: '12px' }}>
+            OutdoorBalkans
+          </p>
+          <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(1.8rem,3vw,2.8rem)',
+            fontWeight: 900, color: '#fff', marginBottom: '24px' }}>
+            🔍 Pretraga lokacija
+          </h1>
+          <form action='/pretraga' method='GET'>
+            <div style={{ display: 'flex', background: '#fff', borderRadius: '999px',
+              padding: '6px 6px 6px 20px', gap: '8px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+              <input name='q' defaultValue={q} type='search'
+                placeholder='Pretraži lokacije, reke, planine...'
+                style={{ flex: 1, border: 'none', outline: 'none', fontSize: '1rem',
+                  color: '#0e1a0e', background: 'transparent', padding: '10px 0',
+                  fontFamily: 'inherit' }} />
+              {cat && <input type='hidden' name='cat' value={cat} />}
+              <button type='submit' style={{ background: '#2d6a2d', color: '#fff',
+                border: 'none', borderRadius: '999px', padding: '12px 28px',
+                fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer' }}>
+                Traži
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
 
-      {/* Broj rezultata */}
-      {hasFilters && (
-        <p className="text-gray-500 text-sm mb-4">
-          {results.length === 0
-            ? 'Nema rezultata za ove filtere.'
-            : `${results.length} lokacija pronađeno`}
-        </p>
-      )}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 24px 80px' }}>
 
-      {/* Rezultati */}
-      {results.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {results.map((loc: any) => {
-            const catSlug = loc.categories?.slug ?? ''
-            const fishList = loc.location_fish
-              ?.map((lf: any) => lf.fish_types?.name)
-              .filter(Boolean) ?? []
-
+        {/* Filter kategorije */}
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '28px' }}>
+          <Link href={`/pretraga${q ? `?q=${q}` : ''}`}
+            style={{ padding: '6px 16px', borderRadius: '999px', border: '1.5px solid',
+              borderColor: !cat ? '#2d6a2d' : '#e8e2d4',
+              background: !cat ? '#2d6a2d' : '#fff',
+              color: !cat ? '#fff' : '#555',
+              fontSize: '0.82rem', fontWeight: 700, textDecoration: 'none' }}>
+            Sve kategorije
+          </Link>
+          {(categories ?? []).map((c: any) => {
+            const dispSlug = c.slug === 'rezervati' ? 'nacionalni-parkovi' : c.slug
+            const dispName = c.slug === 'rezervati' ? 'Nacionalni parkovi' : c.name
+            const isActive = cat === dispSlug
+            const col = CAT_COLORS[dispSlug] ?? '#2d6a2d'
             return (
-              <Link key={loc.id}
-                href={`/${loc.countries?.slug}/${catSlug}/${loc.slug}`}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden
-                           hover:shadow-lg hover:border-green-200 transition-all group">
-
-                <div className={`w-full h-40 overflow-hidden bg-gradient-to-br
-                                 ${GRADIENTS[catSlug] ?? 'from-gray-400 to-gray-500'}`}>
-                  {loc.image_url
-                    ? <img src={loc.image_url} alt={loc.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
-                    : <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-5xl opacity-80">{loc.categories?.icon ?? '📍'}</span>
-                      </div>
-                  }
-                </div>
-
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
-                      {loc.categories?.icon} {loc.categories?.name}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {loc.regions?.name ?? loc.countries?.name}
-                    </span>
-                    {loc.permit_required
-                      ? <span className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded-full">⚠️ Dozvola</span>
-                      : <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">✅ Slobodno</span>
-                    }
-                  </div>
-                  <h2 className="font-bold text-gray-900 mb-1 group-hover:text-green-800 transition-colors">
-                    {loc.name}
-                  </h2>
-                  <p className="text-gray-500 text-sm line-clamp-2">{loc.short_description}</p>
-                  {fishList.length > 0 && (
-                    <p className="text-xs text-blue-600 mt-2 font-medium">🐟 {fishList.join(', ')}</p>
-                  )}
-                </div>
+              <Link key={c.id}
+                href={`/pretraga?cat=${dispSlug}${q ? `&q=${q}` : ''}`}
+                style={{ padding: '6px 16px', borderRadius: '999px', border: '1.5px solid',
+                  borderColor: isActive ? col : '#e8e2d4',
+                  background: isActive ? col : '#fff',
+                  color: isActive ? '#fff' : '#555',
+                  fontSize: '0.82rem', fontWeight: 700, textDecoration: 'none',
+                  display: 'flex', alignItems: 'center', gap: '5px' }}>
+                {c.icon} {dispName}
               </Link>
             )
           })}
         </div>
-      )}
 
-      {/* Prazan state */}
-      {!hasFilters && (
-        <div className="text-center py-16 text-gray-400">
-          <div className="text-5xl mb-4">🔍</div>
-          <p className="text-lg font-medium text-gray-600">Koristi filtere iznad</p>
-          <p className="text-sm mt-1">Odaberi kategoriju, državu, dozvolu ili vrstu ribe</p>
+        {/* Rezultati info */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
+          <p style={{ color: '#8fa68f', fontSize: '0.85rem' }}>
+            {filtered.length === 0 ? 'Nema rezultata' :
+              `${filtered.length} lokacija${q ? ` za "${q}"` : ''}${cat ? ` · ${cat}` : ''}`}
+          </p>
         </div>
-      )}
 
-      {hasFilters && results.length === 0 && (
-        <div className="text-center py-16">
-          <div className="text-5xl mb-4">😔</div>
-          <p className="text-lg font-medium text-gray-600">Nema rezultata</p>
-          <p className="text-sm text-gray-400 mt-1 mb-4">Pokušaj sa manje filtera</p>
-          <Link href="/pretraga"
-            className="inline-block bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-green-800">
-            Resetuj sve filtere
-          </Link>
-        </div>
-      )}
-    </main>
+        {filtered.length > 0 ? (
+          <div style={{ display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '20px' }}>
+            {filtered.map((loc: any) => {
+              const cs  = loc.categories?.slug ?? ''
+              const col = CAT_COLORS[cs] ?? '#2d6a2d'
+              const dispCat = cs === 'rezervati' ? 'nacionalni-parkovi' : cs
+              return (
+                <Link key={loc.id}
+                  href={`/${loc.countries?.slug ?? 'srbija'}/${dispCat}/${loc.slug}`}
+                  style={{ textDecoration: 'none' }}>
+                  <div className='loc-card' style={{ borderRadius: '18px', overflow: 'hidden',
+                    background: '#fff', border: '1px solid #f0ede6',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                    transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                    <div style={{ height: '190px', position: 'relative', background: col, overflow: 'hidden' }}>
+                      {loc.image_url ? (
+                        <img src={loc.image_url} alt={loc.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%',
+                          background: `linear-gradient(135deg,${col}dd 0%,${col}66 100%)`,
+                          display: 'flex', alignItems: 'center',
+                          justifyContent: 'center', fontSize: '3rem' }}>
+                          {loc.categories?.icon ?? '📍'}
+                        </div>
+                      )}
+                      <div style={{ position: 'absolute', inset: 0,
+                        background: 'linear-gradient(to top,rgba(0,0,0,0.45) 0%,transparent 55%)' }} />
+                      <div style={{ position: 'absolute', bottom: '10px', left: '10px',
+                        background: col, color: '#fff',
+                        fontSize: '0.68rem', fontWeight: 700,
+                        padding: '3px 10px', borderRadius: '999px' }}>
+                        {loc.categories?.icon} {loc.categories?.name === 'Rezervati' ? 'Nacionalni parkovi' : loc.categories?.name}
+                      </div>
+                    </div>
+                    <div style={{ padding: '14px 16px 18px' }}>
+                      <p style={{ fontSize: '0.72rem', color: '#8fa68f',
+                        marginBottom: '4px' }}>📍 {loc.regions?.name ?? 'Srbija'}</p>
+                      <h3 style={{ fontFamily: SERIF, fontSize: '1rem', fontWeight: 700,
+                        color: '#0e1a0e', marginBottom: '6px', lineHeight: 1.3 }}>{loc.name}</h3>
+                      <p style={{ fontSize: '0.82rem', color: '#8fa68f', lineHeight: 1.5,
+                        display: '-webkit-box', WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {loc.short_description}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '80px 24px' }}>
+            <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🔍</div>
+            <h2 style={{ fontFamily: SERIF, fontSize: '1.6rem', fontWeight: 700,
+              color: '#0e1a0e', marginBottom: '12px' }}>Nema rezultata</h2>
+            <p style={{ color: '#8fa68f', marginBottom: '24px' }}>
+              Pokušaj sa drugim pojmom ili pogledaj sve lokacije.
+            </p>
+            <Link href='/pretraga' style={{ background: '#2d6a2d', color: '#fff',
+              padding: '12px 28px', borderRadius: '999px',
+              textDecoration: 'none', fontWeight: 700 }}>
+              Sve lokacije
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
