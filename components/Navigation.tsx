@@ -127,8 +127,8 @@ export default function Navigation() {
             )}
           </div>
 
-          <Link href='/vijesti' style={{ color: textCol, fontSize: '0.9rem', fontWeight: 600,
-            textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap' }}>Vesti</Link>
+          <Link href='/kalendar-aktivnosti' style={{ color: textCol, fontSize: '0.9rem', fontWeight: 600,
+            textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap' }}>Kalendar</Link>
           <Link href='/predlozi-lokaciju' style={{ color: textCol, fontSize: '0.9rem', fontWeight: 600,
             textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap' }}>+ Dodaj</Link>
 
@@ -239,8 +239,8 @@ export default function Navigation() {
             </Link>
           ))}
           <div style={{ borderTop: '1px solid #f0ede6', margin: '12px 0' }} />
-          <Link href='/vijesti' style={{ display: 'block', padding: '13px 12px', borderRadius: '12px',
-            textDecoration: 'none', fontSize: '0.95rem', fontWeight: 600, color: '#0e1a0e' }}>📰 Vesti</Link>
+          <Link href='/kalendar-aktivnosti' style={{ display: 'block', padding: '13px 12px', borderRadius: '12px',
+            textDecoration: 'none', fontSize: '0.95rem', fontWeight: 600, color: '#0e1a0e' }}>📅 Kalendar</Link>
           <Link href='/predlozi-lokaciju' style={{ display: 'block', padding: '13px 12px', borderRadius: '12px',
             textDecoration: 'none', fontSize: '0.95rem', fontWeight: 600, color: '#0e1a0e' }}>📍 + Dodaj lokaciju</Link>
           <div style={{ borderTop: '1px solid #f0ede6', margin: '12px 0' }} />

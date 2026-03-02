@@ -349,7 +349,7 @@ export default async function HomePage() {
               <div>
                 <p style={{ color: '#6ab87a', fontSize: '0.72rem', fontWeight: 700,
                   letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px' }}>Ostalo</p>
-                {[['/predlozi-lokaciju','Dodaj lokaciju'],['/vijesti','Vesti'],
+                {[['/predlozi-lokaciju','Dodaj lokaciju'],['/kalendar-aktivnosti','Kalendar'],
                   ['/kontakt','Kontakt'],['/admin','Admin']].map(([h,l]) => (
                   <div key={h} style={{ marginBottom: '8px' }}>
                     <Link href={h} style={{ color: '#8fb898', fontSize: '0.88rem', textDecoration: 'none' }}>{l}</Link>
