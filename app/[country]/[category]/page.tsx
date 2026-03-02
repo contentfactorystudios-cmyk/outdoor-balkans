@@ -18,7 +18,7 @@ const CAT_CONFIG: Record<string, {
   kampovanje:   { name: 'Kampovanje',   gradient: 'from-green-600 to-emerald-500',bg: 'bg-green-50',  text: 'text-green-800',  icon: '⛺', desc: 'Kampovi i priroda' },
   planinarenje: { name: 'Planinarenje', gradient: 'from-purple-600 to-violet-500',bg: 'bg-purple-50', text: 'text-purple-800', icon: '🥾', desc: 'Planine i staze' },
   kajak:      { name: 'Kajak & Jezera', gradient: 'from-cyan-600 to-blue-500', bg: 'bg-cyan-50', text: 'text-cyan-800', icon: '🚣', desc: 'Reke, jezera i kupanje' },
-  rezervati:    { name: 'Rezervati prirode', gradient: 'from-teal-600 to-green-500', bg: 'bg-teal-50', text: 'text-teal-800', icon: '🦋', desc: 'Zaštićena priroda' },
+  'nacionalni-parkovi':    { name: 'Nacionalni parkovi prirode', gradient: 'from-teal-600 to-green-500', bg: 'bg-teal-50', text: 'text-teal-800', icon: '🦋', desc: 'Nacionalni parkovi' },
 }
 
 const COUNTRY_SR: Record<string, string> = {
@@ -159,14 +159,14 @@ export default async function CategoryPage({ params }: Props) {
                       {loc.regions?.name ?? countryDisplay}
                     </p>
                     <h3 className="font-bold text-gray-900 text-sm mb-2 leading-snug
-                                   group-hover:text-green-700 transition-colors line-clamp-2">
+                                   'group-hover':text-green-700 transition-colors line-clamp-2">
                       {loc.name}
                     </h3>
                     <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                       {loc.short_description}
                     </p>
                     <div className="mt-3 text-xs font-semibold text-green-700
-                                    group-hover:text-green-900 flex items-center gap-1">
+                                    'group-hover':text-green-900 flex items-center gap-1">
                       Pogledaj detalje →
                     </div>
                   </div>

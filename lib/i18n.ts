@@ -16,7 +16,7 @@ export const translations: Record<LangCode, Record<string, string>> = {
     'nav.kayak': '🚣 Kajak',
     'nav.camping': '⛺ Kampovanje',
     'nav.hiking': '🥾 Planinarenje',
-    'nav.reserves': '🦋 Rezervati',
+    'nav.reserves': '🦋 Nacionalni parkovi',
     'nav.news': '📰 Vesti',
     'nav.login': 'Prijava',
     'nav.register': 'Registruj se',

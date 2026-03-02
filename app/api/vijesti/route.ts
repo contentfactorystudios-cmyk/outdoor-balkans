@@ -40,7 +40,7 @@ const FALLBACK = [
     description: 'Nacionalni park Đerdap — turistički vodič, ulaznice, staze i informacije o prirodnim i kulturnim vrednostima.',
     pubDate: new Date(Date.now() - 345600000).toISOString(),
     source: 'NP Đerdap',
-    category: '🦋 Rezervati',
+    category: '🦋 Nacionalni parkovi',
   },
   {
     title: 'Rafting Bajina Bašta — Drina avantura',
@@ -64,7 +64,7 @@ const FALLBACK = [
     description: 'Zvanični turistički portal Srbije — sve informacije za outdoor turizam, nacionalni parkovi i prirodne atrakcije.',
     pubDate: new Date(Date.now() - 604800000).toISOString(),
     source: 'Turistička organizacija Srbije',
-    category: '🦋 Rezervati',
+    category: '🦋 Nacionalni parkovi',
   },
 ]
 

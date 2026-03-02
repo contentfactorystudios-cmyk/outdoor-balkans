@@ -70,12 +70,12 @@ const CATEGORY_ADVICE: Record<string, Record<string, { text: string; color: stri
     vrucina:    { text: '☀️ Odlično za kupanje i kajak!', color: 'text-green-700' },
     mraz:       { text: '🥶 Mraz — voda opasno hladna', color: 'text-blue-700' },
   },
-  rezervati: {
-    odlicno:    { text: '🦋 Odlični uslovi za posetu rezervatu!', color: 'text-green-700' },
+  'nacionalni-parkovi': {
+    odlicno:    { text: '🦋 Odlični uslovi za posetu nacionalni parku!', color: 'text-green-700' },
     oblacno:    { text: '🦋 Oblačno — životinje aktivnije, dobro za posmatranje', color: 'text-green-700' },
     kisa:       { text: '🌧️ Kiša — staze mokre, ponesi kapu i kabanicu', color: 'text-yellow-700' },
     sneg:       { text: '❄️ Sneg — zimski pejzaž, ali proveri radno vreme', color: 'text-blue-700' },
-    grmljavina: { text: '⛈️ Grmljavina — odloži posetu rezervatu', color: 'text-red-700' },
+    grmljavina: { text: '⛈️ Grmljavina — odloži posetu nacionalni parku', color: 'text-red-700' },
     vrucina:    { text: '🥵 Vrućina — ponesi vodu i šešir', color: 'text-orange-700' },
     mraz:       { text: '🥶 Mraz — topla odeća obavezna', color: 'text-blue-700' },
   },
@@ -138,7 +138,7 @@ interface Props {
   lat:          number
   lng:          number
   locationName: string
-  category?:    string   // 'ribolov' | 'lov' | 'kampovanje' | 'planinarenje' | 'kajak' | 'rezervati'
+  category?:    string   // 'ribolov' | 'lov' | 'kampovanje' | 'planinarenje' | 'kajak' | 'nacionalni-parkovi'
 }
 
 export default function WeatherWidget({ lat, lng, locationName, category = 'kampovanje' }: Props) {

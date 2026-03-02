@@ -18,7 +18,7 @@ const EXPLORE = [
   { href: '/srbija/kajak',        icon: '🚣', label: 'Kajak',        sub: 'Kanjoni i reke' },
   { href: '/srbija/kampovanje',   icon: '⛺', label: 'Kampovanje',   sub: 'Kampovi u prirodi' },
   { href: '/srbija/planinarenje', icon: '🥾', label: 'Planinarenje', sub: 'Planine i staze' },
-  { href: '/srbija/rezervati',    icon: '🦋', label: 'Rezervati',    sub: 'Zaštićena priroda' },
+  { href: '/srbija/nacionalni-parkovi',    icon: '🦋', label: 'Nacionalni parkovi',    sub: 'Nacionalni parkovi' },
   { href: '/products',            icon: '🎒', label: 'Oprema',       sub: 'Outdoor shop' },
 ]
 

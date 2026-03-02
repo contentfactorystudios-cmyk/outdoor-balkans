@@ -14,7 +14,7 @@ const SLIDES = [
     hero: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=1920&h=1080&fit=crop&q=85' },
   { slug: 'planinarenje', label: '🥾 Planinarenje', sub: 'Planine i staze',
     hero: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1920&h=1080&fit=crop&q=85' },
-  { slug: 'rezervati',    label: '🦋 Rezervati',    sub: 'Zaštićena priroda',
+  { slug: 'nacionalni-parkovi',    label: '🦋 Nacionalni parkovi',    sub: 'Nacionalni parkovi',
     hero: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&h=1080&fit=crop&q=85' },
 ]
 

@@ -28,7 +28,7 @@ const ITEMS = [
     desc: 'Lagano karbon veslo za kajak, podesive dužine 215-235cm.',
     price: '~€75',
     img: 'https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?w=400&h=500&fit=crop&q=80' },
-  { cat: 'Rezervati',    icon: '🦋', slug: 'rezervati',
+  { cat: 'Nacionalni parkovi',    icon: '🦋', slug: 'nacionalni-parkovi',
     name: 'Terenska kamera',
     desc: 'Automatska terenska kamera 4K za praćenje divljači.',
     price: '~€180',

@@ -20,7 +20,7 @@ const CAT: Record<string, { photo: string; hero: string; color: string }> = {
   planinarenje: { color: '#5b21b6',
     photo: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=300&h=300&fit=crop&q=80',
     hero:  'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1920&h=1080&fit=crop&q=85' },
-  rezervati:    { color: '#0f766e',
+  'nacionalni-parkovi':    { color: '#0f766e',
     photo: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=300&fit=crop&q=80',
     hero:  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&h=1080&fit=crop&q=85' },
 }
@@ -89,6 +89,8 @@ export default async function HomePage() {
             scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
             justifyContent: 'center', flexWrap: 'nowrap' }}>
             {cats.map((cat: any) => {
+              // Normalize rezervati → nacionalni-parkovi
+              if (cat.slug === 'rezervati') { cat = {...cat, slug: 'nacionalni-parkovi', name: 'Nacionalni parkovi'} }
               const p = CAT[cat.slug]
               return (
                 <Link key={cat.id} href={'/srbija/' + cat.slug}

@@ -18,22 +18,6 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { country, category, slug } = await params
-    const location = await getLocationBySlug(country, category, slug)
-    if (!location) return {}
-    return {
-      title:       location.meta_title       ?? location.name,
-      description: location.meta_description ?? location.short_description ?? '',
-      openGraph: {
-        title:       location.meta_title       ?? location.name,
-        description: location.meta_description ?? location.short_description ?? '',
-        images:      location.image_url ? [{ url: location.image_url }] : [],
-      },
-    }
-  } catch { return {} }
-}
-
-export default async function LocationPage({ params }: Props) {
-  const { country, category, slug } = await params
   const location = await getLocationBySlug(country, category, slug)
   if (!location) notFound()
 
