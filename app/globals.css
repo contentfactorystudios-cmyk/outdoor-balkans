@@ -161,3 +161,8 @@ body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--cream); 
 }
 /* Hover card */
 .loc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.1) !important; }
+
+/* Kalendar responsive */
+@media (max-width: 900px) {
+  .cal-layout { grid-template-columns: 1fr !important; }
+}
