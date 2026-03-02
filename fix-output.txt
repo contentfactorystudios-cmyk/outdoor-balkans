@@ -1,0 +1,1083 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: app/page.tsx, components/LocationsNearby.tsx, lib/getCategoryPhoto.ts, lib/getLocationPhoto.ts, app/[country]/[category]/[slug]/page.tsx, next.config.ts
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+
+
+================================================================
+Directory Structure
+================================================================
+app/
+  [country]/
+    [category]/
+      [slug]/
+        page.tsx
+  page.tsx
+components/
+  LocationsNearby.tsx
+lib/
+  getCategoryPhoto.ts
+  getLocationPhoto.ts
+next.config.ts
+
+================================================================
+Files
+================================================================
+
+================
+File: lib/getCategoryPhoto.ts
+================
+export const CAT_FALLBACK: Record<string, string> = {
+  ribolov:             'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&h=500&fit=crop&q=85',
+  lov:                 'https://images.unsplash.com/photo-1484406566174-9da000fda645?w=800&h=500&fit=crop&q=85',
+  kajak:               'https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?w=800&h=500&fit=crop&q=85',
+  kampovanje:          'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&h=500&fit=crop&q=85',
+  planinarenje:        'https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&h=500&fit=crop&q=85',
+  'nacionalni-parkovi':'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=500&fit=crop&q=85',
+  rezervati:           'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=500&fit=crop&q=85',
+}
+
+// ═══ PROVJERENI Wikimedia Commons URL-ovi za srpske lokacije ═══
+// Svaki URL je ručno provjeren — pravi pejzaž, prava lokacija
+export const KNOWN_PHOTOS: Record<string, string> = {
+  // Ribolov
+  'vlasina':        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Vlasina_2.jpg/1280px-Vlasina_2.jpg',
+  'derdap':         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Djerdap_klisura.jpg/1280px-Djerdap_klisura.jpg',
+  'srebrno':        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Srebrno_jezero_Great_War_Island_panorama.jpg/1280px-Srebrno_jezero_Great_War_Island_panorama.jpg',
+  'uvac':           'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Uvac_kanjon.jpg/1280px-Uvac_kanjon.jpg',
+  'palicko':        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Palic_Lake_sunset.jpg/1280px-Palic_Lake_sunset.jpg',
+  'palic':          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Palic_Lake_sunset.jpg/1280px-Palic_Lake_sunset.jpg',
+  // Planinarenje
+  'kopaonik':       'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Kopaonik_ski_resort.jpg/1280px-Kopaonik_ski_resort.jpg',
+  'rtanj':          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Rtanj_-_panoramio_%281%29.jpg/1280px-Rtanj_-_panoramio_%281%29.jpg',
+  'zlatibor':       'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Zlatibor-panorama.jpg/1280px-Zlatibor-panorama.jpg',
+  'stara-planina':  'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Babin_zub_-_Stara_planina.jpg/1280px-Babin_zub_-_Stara_planina.jpg',
+  'suva-planina':   'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Suva_planina_-_vrh.jpg/1280px-Suva_planina_-_vrh.jpg',
+  // Nacionalni parkovi
+  'tara':           'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Tara_mountain_Serbia.jpg/1280px-Tara_mountain_Serbia.jpg',
+  'zasavica':       'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Zasavica_special_nature_reserve.jpg/1280px-Zasavica_special_nature_reserve.jpg',
+  'fruska':         'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Fruska_Gora_-_jesen.jpg/1280px-Fruska_Gora_-_jesen.jpg',
+  'obedska':        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Obedska_bara.jpg/1280px-Obedska_bara.jpg',
+  // Kajak
+  'lim':            'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&h=500&fit=crop&q=85',
+  'ibar':           'https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?w=800&h=500&fit=crop&q=85',
+}
+
+export function getCardPhoto(slug: string, imageUrl: string | null, category: string): string {
+  if (imageUrl) return imageUrl
+
+  // Pokušaj pronaći u KNOWN_PHOTOS — matchuj po dijelovima slug-a
+  const slugLower = slug.toLowerCase()
+  for (const [key, url] of Object.entries(KNOWN_PHOTOS)) {
+    if (slugLower.includes(key) || key.split('-').every(part => slugLower.includes(part))) {
+      return url
+    }
+  }
+
+  // Category fallback
+  return CAT_FALLBACK[category] ?? CAT_FALLBACK['planinarenje']
+}
+
+================
+File: lib/getLocationPhoto.ts
+================
+import { getCardPhoto, CAT_FALLBACK, KNOWN_PHOTOS } from './getCategoryPhoto'
+
+export interface PhotoResult {
+  url: string
+  source: 'location' | 'wikipedia' | 'known' | 'category'
+}
+
+export async function getLocationPhoto(params: {
+  imageUrl?: string | null
+  locationName: string
+  category: string
+  lat?: number
+  lng?: number
+}): Promise<PhotoResult> {
+  const { imageUrl, locationName, category } = params
+
+  // 1. Vlastita slika lokacije u bazi
+  if (imageUrl) return { url: imageUrl, source: 'location' }
+
+  // 2. Provjereni offline cache
+  const nameLower = locationName.toLowerCase()
+    .replace('đ','dj').replace('š','s').replace('č','c').replace('ć','c').replace('ž','z')
+  
+  for (const [key, url] of Object.entries(KNOWN_PHOTOS)) {
+    const keyWords = key.split('-')
+    if (keyWords.some(w => w.length > 3 && nameLower.includes(w))) {
+      return { url, source: 'known' }
+    }
+  }
+
+  // 3. Category fallback — uvijek radi
+  const catPhoto = CAT_FALLBACK[category] ?? CAT_FALLBACK['planinarenje']
+  return { url: catPhoto, source: 'category' }
+}
+
+================
+File: app/[country]/[category]/[slug]/page.tsx
+================
+// weather-added
+import { getLocationBySlug, extractCoordinates } from '@/lib/queries'
+import { getLocationPhoto } from '@/lib/getLocationPhoto'
+import ShareButtons    from '@/components/ShareButtons'
+import ReactionsBar    from '@/components/ReactionsBar'
+import WeatherWidget   from '@/components/WeatherWidget'
+import CommentsSection from '@/components/CommentsSection'
+import { notFound, redirect } from 'next/navigation'
+import Link from 'next/link'
+import type { Metadata } from 'next'
+
+export const revalidate = 86400
+
+const SERIF = "'Fraunces','Playfair Display',Georgia,serif"
+const SANS  = "'DM Sans',system-ui,sans-serif"
+
+const CAT_META: Record<string, { color: string; icon: string; label: string }> = {
+  ribolov:             { color: '#1d5fa8', icon: '🎣', label: 'Ribolov' },
+  lov:                 { color: '#5a3010', icon: '🦌', label: 'Lov' },
+  kajak:               { color: '#0e7490', icon: '🚣', label: 'Kajak' },
+  kampovanje:          { color: '#166534', icon: '⛺', label: 'Kampovanje' },
+  planinarenje:        { color: '#5b21b6', icon: '🥾', label: 'Planinarenje' },
+  'nacionalni-parkovi':{ color: '#0f766e', icon: '🦋', label: 'Nacionalni parkovi' },
+  rezervati:           { color: '#0f766e', icon: '🦋', label: 'Nacionalni parkovi' },
+}
+
+interface Props {
+  params: Promise<{ country: string; category: string; slug: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  try {
+    const { country, category, slug } = await params
+    const location = await getLocationBySlug(country, category, slug)
+    if (!location) return {}
+    return {
+      title:       location.meta_title       ?? location.name,
+      description: location.meta_description ?? location.short_description ?? '',
+      openGraph: {
+        title:       location.meta_title       ?? location.name,
+        description: location.meta_description ?? location.short_description ?? '',
+        images:      location.image_url ? [{ url: location.image_url }] : [],
+      },
+    }
+  } catch { return {} }
+}
+
+export default async function LocationPage({ params }: Props) {
+  const { country, category: rawCategory, slug } = await params
+  if (rawCategory === 'rezervati') redirect('/srbija/nacionalni-parkovi/' + slug)
+  const category = rawCategory
+
+  const location = await getLocationBySlug(country, category, slug)
+  if (!location) notFound()
+
+  const coords  = extractCoordinates(location.coordinates)
+  const pageUrl = `https://outdoorbalkans.com/${country}/${category}/${slug}`
+  const lat     = coords?.lat ?? 0
+  const lng     = coords?.lng ?? 0
+  const catMeta = CAT_META[category] ?? { color: '#2d6a2d', icon: '📍', label: category }
+
+  // Hero slika — pokušaj Wikipedia/Commons/Mapbox/Category
+  const photoResult = await getLocationPhoto({
+    imageUrl: location.image_url,
+    locationName: location.name,
+    category,
+    lat: coords?.lat,
+    lng: coords?.lng,
+  })
+  const heroImg = photoResult.url
+
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+
+  return (
+    <div style={{ fontFamily: SANS, background: '#fff', minHeight: '100vh' }}>
+
+      {/* ═══ HERO ═══ */}
+      <section style={{ position: 'relative', height: '62vh', minHeight: '420px', overflow: 'hidden' }}>
+        {heroImg ? (
+          <img src={heroImg} alt={location.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }} />
+        ) : (
+          <div style={{ width: '100%', height: '100%',
+            background: `linear-gradient(135deg, ${catMeta.color}ee 0%, ${catMeta.color}88 100%)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6rem' }}>
+            {catMeta.icon}
+          </div>
+        )}
+
+        {/* Overlay */}
+        <div style={{ position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.72) 100%)' }} />
+
+        {/* Breadcrumb */}
+        <div style={{ position: 'absolute', top: '80px', left: '24px', right: '24px',
+          display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <Link href='/' style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.8rem',
+            textDecoration: 'none', fontWeight: 500 }}>Početna</Link>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>›</span>
+          <Link href={`/srbija/${category}`} style={{ color: 'rgba(255,255,255,0.75)',
+            fontSize: '0.8rem', textDecoration: 'none', fontWeight: 500 }}>
+            {catMeta.icon} {catMeta.label}
+          </Link>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>›</span>
+          <span style={{ color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}>{location.name}</span>
+        </div>
+
+        {/* Title area */}
+        <div style={{ position: 'absolute', bottom: '36px', left: '24px', right: '24px',
+          maxWidth: '860px', margin: '0 auto' }}>
+          {/* Tags */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
+            <span style={{ background: catMeta.color, color: '#fff',
+              padding: '4px 12px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700 }}>
+              {catMeta.icon} {catMeta.label}
+            </span>
+            {location.best_season && (
+              <span style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
+                color: '#fff', padding: '4px 12px', borderRadius: '999px',
+                fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(255,255,255,0.3)' }}>
+                🗓️ {location.best_season}
+              </span>
+            )}
+            {location.permit_required && (
+              <span style={{ background: 'rgba(255,165,0,0.35)', backdropFilter: 'blur(8px)',
+                color: '#fff', padding: '4px 12px', borderRadius: '999px',
+                fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(255,165,0,0.4)' }}>
+                ⚠️ Dozvola obavezna
+              </span>
+            )}
+          </div>
+
+          <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(1.8rem,4vw,3.2rem)',
+            fontWeight: 900, color: '#fff', lineHeight: 1.15, marginBottom: '8px',
+            textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}>
+            {location.name}
+          </h1>
+
+          {location.regions?.name && (
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1rem', fontWeight: 500 }}>
+              📍 {location.regions.name}{location.countries?.name ? `, ${location.countries.name}` : ''}
+            </p>
+          )}
+        </div>
+
+        {/* Photo source badge */}
+        {photoResult.source !== 'location' && (
+          <div style={{ position: 'absolute', top: '80px', right: '24px',
+            background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)',
+            color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 500,
+            padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)' }}>
+            {photoResult.source === 'wikipedia' ? '📷 Wikipedia' :
+             photoResult.source === 'commons'   ? '📷 Wikimedia Commons' :
+             photoResult.source === 'mapbox'    ? '🛰️ Satelitski snimak' :
+             '📷 Kategorija'}
+          </div>
+        )}
+        {/* Wave */}
+        <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0 }}>
+          <svg viewBox='0 0 1440 50' preserveAspectRatio='none'
+            style={{ display: 'block', width: '100%', height: '50px' }}>
+            <path d='M0 50 C360 10 1080 40 1440 20 L1440 50 Z' fill='#fff'/>
+          </svg>
+        </div>
+      </section>
+
+      {/* ═══ MAIN CONTENT ═══ */}
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px 80px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '40px',
+          alignItems: 'start' }} className='loc-grid'>
+
+          {/* LIJEVO — Sadržaj */}
+          <div>
+
+            {/* Share + Reactions */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '20px 0', borderBottom: '1px solid #f0ede6', marginBottom: '32px',
+              flexWrap: 'wrap', gap: '12px' }}>
+              <ReactionsBar locationId={location.id} />
+              <ShareButtons title={location.name} />
+            </div>
+
+            {/* Opis */}
+            {location.description && (
+              <div style={{ marginBottom: '40px' }}>
+                <h2 style={{ fontFamily: SERIF, fontSize: '1.3rem', fontWeight: 700,
+                  color: '#0e1a0e', marginBottom: '16px' }}>O lokaciji</h2>
+                <div style={{ fontSize: '1rem', color: '#3d4d3d', lineHeight: 1.8 }}
+                  dangerouslySetInnerHTML={{ __html: location.description }} />
+              </div>
+            )}
+
+            {/* Kratki opis ako nema puni */}
+            {!location.description && location.short_description && (
+              <div style={{ marginBottom: '40px', padding: '24px', borderRadius: '16px',
+                background: '#f9f7f2', border: '1px solid #f0ede6' }}>
+                <p style={{ fontSize: '1.05rem', color: '#3d4d3d', lineHeight: 1.8, margin: 0 }}>
+                  {location.short_description}
+                </p>
+              </div>
+            )}
+
+            {/* Praktične informacije */}
+            <div style={{ background: '#f9f7f2', borderRadius: '20px', padding: '28px',
+              marginBottom: '40px', border: '1px solid #f0ede6' }}>
+              <h2 style={{ fontFamily: SERIF, fontSize: '1.2rem', fontWeight: 700,
+                color: '#0e1a0e', marginBottom: '20px' }}>
+                📋 Praktične informacije
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))',
+                gap: '16px' }}>
+                {location.best_season && (
+                  <div style={{ background: '#fff', borderRadius: '12px', padding: '14px 16px',
+                    border: '1px solid #f0ede6' }}>
+                    <p style={{ fontSize: '0.7rem', color: '#8fa68f', fontWeight: 700,
+                      textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                      🗓️ Sezona
+                    </p>
+                    <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0e1a0e' }}>
+                      {location.best_season}
+                    </p>
+                  </div>
+                )}
+                {location.permit_info && (
+                  <div style={{ background: '#fff', borderRadius: '12px', padding: '14px 16px',
+                    border: '1px solid #f0ede6' }}>
+                    <p style={{ fontSize: '0.7rem', color: '#8fa68f', fontWeight: 700,
+                      textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                      📄 Dozvola
+                    </p>
+                    <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0e1a0e' }}>
+                      {location.permit_info}
+                    </p>
+                  </div>
+                )}
+                {location.difficulty && (
+                  <div style={{ background: '#fff', borderRadius: '12px', padding: '14px 16px',
+                    border: '1px solid #f0ede6' }}>
+                    <p style={{ fontSize: '0.7rem', color: '#8fa68f', fontWeight: 700,
+                      textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                      ⚡ Težina
+                    </p>
+                    <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0e1a0e' }}>
+                      {location.difficulty}
+                    </p>
+                  </div>
+                )}
+                {location.fish_species && (
+                  <div style={{ background: '#fff', borderRadius: '12px', padding: '14px 16px',
+                    border: '1px solid #f0ede6' }}>
+                    <p style={{ fontSize: '0.7rem', color: '#8fa68f', fontWeight: 700,
+                      textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+                      🐟 Ribe
+                    </p>
+                    <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0e1a0e' }}>
+                      {location.fish_species}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Vreme */}
+            {lat !== 0 && (
+              <div style={{ marginBottom: '40px' }}>
+                <h2 style={{ fontFamily: SERIF, fontSize: '1.2rem', fontWeight: 700,
+                  color: '#0e1a0e', marginBottom: '16px' }}>
+                  🌤️ Vremenska prognoza
+                </h2>
+                <WeatherWidget lat={lat} lng={lng} category={category} />
+              </div>
+            )}
+
+            {/* Komentari */}
+            <div>
+              <h2 style={{ fontFamily: SERIF, fontSize: '1.2rem', fontWeight: 700,
+                color: '#0e1a0e', marginBottom: '20px' }}>
+                💬 Komentari zajednice
+              </h2>
+              <CommentsSection locationId={location.id} />
+            </div>
+          </div>
+
+          {/* DESNO — Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '28px' }}>
+
+            {/* GPS Lokacija */}
+            <div style={{ background: '#fff', borderRadius: '20px', padding: '22px',
+              border: '1px solid #f0ede6', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
+              <h3 style={{ fontFamily: SERIF, fontSize: '1.05rem', fontWeight: 700,
+                color: '#0e1a0e', marginBottom: '16px' }}>🧭 GPS Lokacija</h3>
+
+              {lat !== 0 ? (
+                <>
+                  <div style={{ background: '#f9f7f2', borderRadius: '12px', padding: '14px 16px',
+                    marginBottom: '14px', textAlign: 'center' }}>
+                    <p style={{ fontFamily: SERIF, fontSize: '1.3rem', fontWeight: 800,
+                      color: '#0e1a0e', letterSpacing: '0.02em' }}>
+                      {lat.toFixed(5)}, {lng.toFixed(5)}
+                    </p>
+                    <p style={{ fontSize: '0.72rem', color: '#8fa68f', marginTop: '4px',
+                      fontWeight: 500 }}>Latitude, Longitude · WGS84</p>
+                  </div>
+
+                  <a href={mapsUrl} target='_blank' rel='noopener noreferrer'
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      gap: '8px', background: '#1a73e8', color: '#fff', padding: '13px',
+                      borderRadius: '12px', textDecoration: 'none', fontWeight: 700,
+                      fontSize: '0.9rem', marginBottom: '10px' }}>
+                    📍 Otvori u Google Maps
+                  </a>
+
+                  <a href={`geo:${lat},${lng}`}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      gap: '8px', background: '#f9f7f2', color: '#0e1a0e', padding: '11px',
+                      borderRadius: '12px', textDecoration: 'none', fontWeight: 600,
+                      fontSize: '0.88rem', border: '1px solid #f0ede6' }}>
+                    🧭 Navigacija (GPS app)
+                  </a>
+                </>
+              ) : (
+                <p style={{ color: '#8fa68f', fontSize: '0.88rem' }}>
+                  GPS koordinate nisu dostupne.
+                </p>
+              )}
+            </div>
+
+            {/* Brzi pristup */}
+            <div style={{ background: `linear-gradient(135deg, ${catMeta.color}18 0%, ${catMeta.color}08 100%)`,
+              borderRadius: '20px', padding: '22px',
+              border: `1px solid ${catMeta.color}33` }}>
+              <h3 style={{ fontFamily: SERIF, fontSize: '1.05rem', fontWeight: 700,
+                color: '#0e1a0e', marginBottom: '16px' }}>⚡ Brzi pristup</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { href: `/srbija/${category}`, label: `Sve ${catMeta.label} lokacije`, icon: catMeta.icon },
+                  { href: '/pretraga', label: 'Pretraži lokacije', icon: '🔍' },
+                  { href: '/predlozi-lokaciju', label: 'Predloži lokaciju', icon: '📌' },
+                  { href: '/kalendar-aktivnosti', label: 'Kalendar aktivnosti', icon: '📅' },
+                ].map(item => (
+                  <Link key={item.href} href={item.href}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px',
+                      padding: '10px 14px', borderRadius: '12px', background: '#fff',
+                      textDecoration: 'none', border: '1px solid #f0ede6',
+                      fontSize: '0.86rem', fontWeight: 600, color: '#0e1a0e',
+                      transition: 'transform 0.15s' }}>
+                    <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+                    {item.label}
+                    <svg width='11' height='11' viewBox='0 0 24 24' fill='none'
+                      stroke='#ccc' strokeWidth='2' style={{ marginLeft: 'auto' }}>
+                      <path d='M9 18l6-6-6-6'/>
+                    </svg>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Prijavi grešku */}
+            <div style={{ borderRadius: '16px', padding: '16px 18px',
+              border: '1px solid #f0ede6', background: '#fafaf8' }}>
+              <p style={{ fontSize: '0.78rem', color: '#8fa68f', marginBottom: '8px' }}>
+                Informacije nisu tačne?
+              </p>
+              <Link href={`/kontakt?ref=${location.slug}`}
+                style={{ fontSize: '0.82rem', fontWeight: 600, color: '#2d6a2d',
+                  textDecoration: 'none' }}>
+                ✏️ Predloži izmenu →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 860px) {
+          .loc-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+================
+File: components/LocationsNearby.tsx
+================
+'use client'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import Link from 'next/link'
+
+interface Props {
+  catData: Record<string, { photo: string; hero: string; color: string }>
+}
+
+export default function LocationsNearby({ catData }: Props) {
+  const [city, setCity]   = useState<string>('')
+  const [locs, setLocs]   = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Dohvati grad iz IP-a (besplatni API)
+    fetch('https://ipapi.co/json/')
+      .then(r => r.json())
+      .then(d => {
+        const c = d.city || d.region || 'Beograda'
+        setCity(c)
+      })
+      .catch(() => setCity('Beograda'))
+
+    // Dohvati lokacije (najbliže — po created_at za sada, PostGIS u v2)
+    supabase
+      .from('locations')
+      .select('id,name,slug,short_description,image_url,categories(name,slug,icon),countries(name,slug),regions(name)')
+      .eq('is_published', true)
+      .order('is_featured', { ascending: false })
+      .limit(4)
+      .then(({ data }) => {
+        setLocs(data ?? [])
+        setLoading(false)
+      })
+  }, [])
+
+  if (!loading && locs.length === 0) return null
+
+  return (
+    <section style={{ padding: '60px 24px', background: '#f9f7f2' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+          <p style={{ color: '#8fa68f', fontSize: '0.78rem', fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '10px' }}>
+            Preporučeno u tvojoj blizini
+          </p>
+          <h2 style={{ fontFamily: "'Fraunces','Playfair Display',Georgia,serif",
+            fontSize: 'clamp(1.4rem,2.5vw,1.9rem)', fontWeight: 700, color: '#0e1a0e', marginBottom: '8px' }}>
+            {loading ? 'Učitavam lokacije...' : `Preporučeno u blizini — ${city}`}
+          </h2>
+          <Link href='/pretraga' style={{ fontSize: '0.88rem', fontWeight: 600,
+            color: '#2d6a2d', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            Sve lokacije
+            <svg width='16' height='16' viewBox='0 0 24 24' fill='none'
+              stroke='currentColor' strokeWidth='2.5'><path d='M5 12h14M12 5l7 7-7 7'/></svg>
+          </Link>
+        </div>
+
+        {loading ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '20px' }}>
+            {[1,2,3,4].map(i => (
+              <div key={i} style={{ borderRadius: '16px', overflow: 'hidden', background: '#fff', border: '1px solid #f0ede6' }}>
+                <div style={{ height: '200px', background: 'linear-gradient(90deg,#f0ede6 25%,#e8e2d4 50%,#f0ede6 75%)', backgroundSize: '200% 100%' }} />
+                <div style={{ padding: '14px 16px 16px' }}>
+                  <div style={{ height: '12px', background: '#f0ede6', borderRadius: '6px', marginBottom: '8px', width: '60%' }} />
+                  <div style={{ height: '18px', background: '#f0ede6', borderRadius: '6px', marginBottom: '6px' }} />
+                  <div style={{ height: '12px', background: '#f0ede6', borderRadius: '6px', width: '80%' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '20px' }}>
+            {locs.map((loc: any) => {
+              const cs = loc.categories?.slug ?? ''
+              const cp = catData[cs]
+              return (
+                <Link key={loc.id}
+                  href={'/' + (loc.countries?.slug ?? 'srbija') + '/' + cs + '/' + loc.slug}
+                  className='loc-card' style={{ textDecoration: 'none', display: 'block' }}>
+                  <div style={{ borderRadius: '16px', overflow: 'hidden', background: '#fff',
+                    border: '1px solid #f0ede6', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+                    <div style={{ height: '200px', overflow: 'hidden', position: 'relative',
+                      background: cp?.color ?? '#2d6a2d' }}>
+                      {loc.image_url
+                        ? <img src={getCardPhoto(loc.slug ?? l.slug ?? '', loc.image_url, loc.categories?.slug ?? '')} alt={loc.name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <div style={{ width: '100%', height: '100%',
+                              background: `linear-gradient(135deg, ${cp?.color ?? '#2d6a2d'}cc 0%, ${cp?.color ?? '#2d6a2d'}66 100%)`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>
+                              {loc.categories?.icon ?? '🗺️'}
+                            </div>
+                      }
+                      <div style={{ position: 'absolute', inset: 0,
+                        background: 'linear-gradient(to top,rgba(0,0,0,0.4) 0%,transparent 55%)' }} />
+                      <div style={{ position: 'absolute', bottom: '10px', left: '10px',
+                        background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(6px)',
+                        color: '#fff', fontSize: '0.7rem', fontWeight: 600,
+                        padding: '3px 10px', borderRadius: '999px' }}>
+                        {loc.categories?.icon} {loc.categories?.name}
+                      </div>
+                    </div>
+                    <div style={{ padding: '14px 16px 16px' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#8fa68f', marginBottom: '4px',
+                        display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <svg width='10' height='10' viewBox='0 0 24 24' fill='#8fa68f'>
+                          <path d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'/>
+                        </svg>
+                        {loc.regions?.name ?? 'Srbija'}
+                      </div>
+                      <h3 style={{ fontFamily: "'Fraunces','Playfair Display',Georgia,serif",
+                        fontSize: '1rem', fontWeight: 700, color: '#0e1a0e',
+                        marginBottom: '6px', lineHeight: 1.3 }}>{loc.name}</h3>
+                      <p style={{ fontSize: '0.82rem', color: '#8fa68f', lineHeight: 1.5,
+                        display: '-webkit-box', WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {loc.short_description}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+================
+File: next.config.ts
+================
+import type { NextConfig } from "next"
+import createNextIntlPlugin from 'next-intl/plugin'
+
+const withNextIntl = createNextIntlPlugin('./i18n.ts')
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'upload.wikimedia.org' },
+      { protocol: 'https', hostname: 'commons.wikimedia.org' },
+      { protocol: 'https', hostname: 'api.mapbox.com' },
+    ],
+  },
+}
+
+export default withNextIntl(nextConfig)
+
+================
+File: app/page.tsx
+================
+import { getCardPhoto } from '@/lib/getCategoryPhoto'
+import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+import HeroSlider from '@/components/HeroSlider'
+import LocationsNearby from '@/components/LocationsNearby'
+import GearCarousel from '@/components/GearCarousel'
+
+const CAT: Record<string, { photo: string; hero: string; color: string }> = {
+  ribolov:      { color: '#1d5fa8',
+    photo: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop&q=80',
+    hero:  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&h=1080&fit=crop&q=85' },
+  lov:          { color: '#5a3010',
+    photo: 'https://images.unsplash.com/photo-1484406566174-9da000fda645?w=300&h=300&fit=crop&q=80',
+    hero:  'https://images.unsplash.com/photo-1484406566174-9da000fda645?w=1920&h=1080&fit=crop&q=85' },
+  kajak:        { color: '#0e7490',
+    photo: 'https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?w=300&h=300&fit=crop&q=80',
+    hero:  'https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?w=1920&h=1080&fit=crop&q=85' },
+  kampovanje:   { color: '#166534',
+    photo: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=300&h=300&fit=crop&q=80',
+    hero:  'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=1920&h=1080&fit=crop&q=85' },
+  planinarenje: { color: '#5b21b6',
+    photo: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=300&h=300&fit=crop&q=80',
+    hero:  'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1920&h=1080&fit=crop&q=85' },
+  'nacionalni-parkovi':    { color: '#0f766e',
+    photo: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=300&fit=crop&q=80',
+    hero:  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&h=1080&fit=crop&q=85' },
+}
+
+const SERIF = "'Fraunces','Playfair Display',Georgia,serif"
+const SANS  = "'DM Sans',system-ui,sans-serif"
+
+export default async function HomePage() {
+  const [{ data: categories }, { data: featured }, { count }] = await Promise.all([
+    supabase.from('categories').select('id,name,slug,icon').eq('is_active', true).order('sort_order'),
+    supabase.from('locations').select('id,name,slug,short_description,image_url,categories(name,slug,icon),countries(name,slug),regions(name)').eq('is_published', true).order('created_at', { ascending: false }).limit(8),
+    supabase.from('locations').select('id', { count: 'exact', head: true }).eq('is_published', true),
+  ])
+  const locCount = count ?? 25
+  const cats = (categories ?? []) as any[]
+  const locs = (featured ?? []) as any[]
+
+  return (
+    <div style={{ fontFamily: SANS, background: '#fff', minHeight: '100vh' }}>
+
+      {/* HERO */}
+      <section style={{ position: 'relative', height: '75vh', minHeight: '520px', overflow: 'hidden' }}>
+        <HeroSlider catData={CAT} />
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', padding: '0 24px 70px' }}>
+          <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(2.4rem,6vw,5rem)', fontWeight: 900,
+            color: '#fff', lineHeight: 1.1, marginBottom: '28px',
+            textShadow: '0 2px 24px rgba(0,0,0,0.5)', maxWidth: '13ch' }}>
+            Pronađi svoju prirodu.
+          </h1>
+          <form action='/pretraga' method='GET' style={{ width: '100%', maxWidth: '560px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#fff',
+              borderRadius: '999px', padding: '6px 6px 6px 22px',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.35)', gap: '8px' }}>
+              <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#8fa68f' strokeWidth='2.5' strokeLinecap='round' style={{ flexShrink: 0 }}>
+                <circle cx='11' cy='11' r='8'/><path d='m21 21-4.35-4.35'/>
+              </svg>
+              <input name='q' type='search' placeholder='Pretraži reke, planine, lovišta...'
+                style={{ flex: 1, border: 'none', outline: 'none', fontSize: '1rem',
+                  color: '#0e1a0e', background: 'transparent', padding: '10px 0', fontFamily: 'inherit' }} />
+              <button type='submit' style={{ background: '#2d6a2d', color: '#fff', border: 'none',
+                borderRadius: '999px', padding: '12px 28px', fontSize: '0.95rem',
+                fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>Pretraži</button>
+            </div>
+          </form>
+          <Link href='/pretraga?advanced=1' style={{ color: 'rgba(255,255,255,0.88)',
+            fontSize: '0.87rem', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+            Napredno pretraživanje →
+          </Link>
+        </div>
+        <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0, zIndex: 15 }}>
+          <svg viewBox='0 0 1440 80' preserveAspectRatio='none' style={{ display: 'block', width: '100%', height: '80px' }}>
+            <path d='M0 80 C360 20 720 60 1080 30 C1260 15 1380 50 1440 40 L1440 80 Z' fill='#fff'/>
+          </svg>
+        </div>
+      </section>
+
+      {/* KATEGORIJE */}
+      <section style={{ padding: '56px 32px 48px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(1.5rem,3vw,2rem)', fontWeight: 700,
+            color: '#0e1a0e', marginBottom: '36px', textAlign: 'center' }}>
+            Istraži po aktivnosti
+          </h2>
+          <div className='cat-scroll' style={{ display: 'flex', overflowX: 'auto', gap: '24px', paddingBottom: '8px',
+            scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+            justifyContent: 'center', flexWrap: 'nowrap' }}>
+            {cats.map((cat: any) => {
+              // Normalize rezervati → nacionalni-parkovi
+              if (cat.slug === 'rezervati') { cat = {...cat, slug: 'nacionalni-parkovi', name: 'Nacionalni parkovi'} }
+              const p = CAT[cat.slug]
+              return (
+                <Link key={cat.id} href={'/srbija/' + cat.slug}
+                  style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                  <div className='cat-circle' style={{ width: '150px', height: '150px',
+                    borderRadius: '50%', overflow: 'hidden', background: p?.color ?? '#2d6a2d',
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.14)' }}>
+                    {p?.photo
+                      ? <img src={p.photo} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <div style={{ width: '100%', height: '100%', display: 'flex',
+                          alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>{cat.icon}</div>
+                    }
+                  </div>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0e1a0e',
+                    textAlign: 'center', whiteSpace: 'nowrap' }}>{cat.name}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* STATS */}
+      <section style={{ background: '#f4f0e6', padding: '44px 24px' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap',
+          justifyContent: 'center', gap: '40px 60px', textAlign: 'center' }}>
+          {[
+            { n: locCount + '+', l: 'Verifikovanih lokacija', icon: '📍' },
+            { n: '6',            l: 'Kategorija aktivnosti',  icon: '🏔️' },
+            { n: '5+',           l: 'Balkanskih zemalja',     icon: '🌍' },
+            { n: '24/7',         l: 'Ažurirani podaci',       icon: '🌤️' },
+          ].map(s => (
+            <div key={s.l}>
+              <div style={{ fontSize: '1.4rem', marginBottom: '4px' }}>{s.icon}</div>
+              <div style={{ fontFamily: SERIF, fontSize: '2.2rem', fontWeight: 900,
+                color: '#0e1a0e', lineHeight: 1 }}>{s.n}</div>
+              <div style={{ fontSize: '0.8rem', color: '#8fa68f', marginTop: '4px', fontWeight: 500 }}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* LOCAL FAVORITES */}
+      <LocationsNearby catData={CAT} />
+
+      {/* NAJNOVIJE LOKACIJE */}
+      {(
+        <section style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+            <p style={{ color: '#8fa68f', fontSize: '0.78rem', fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '10px' }}>
+              Novo na mapi
+            </p>
+            <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(1.4rem,2.5vw,1.9rem)',
+              fontWeight: 700, color: '#0e1a0e', marginBottom: '10px' }}>
+              Najnovije lokacije
+            </h2>
+            <Link href='/pretraga' style={{ fontSize: '0.88rem', fontWeight: 600, color: '#2d6a2d',
+              textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              Sve lokacije
+              <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5'><path d='M5 12h14M12 5l7 7-7 7'/></svg>
+            </Link>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '20px' }}>
+            {locs.map((loc: any) => {
+              const cs = loc.categories?.slug ?? ''
+              const cp = CAT[cs]
+              return (
+                <Link key={loc.id} href={'/' + (loc.countries?.slug ?? 'srbija') + '/' + cs + '/' + loc.slug}
+                  className='loc-card' style={{ textDecoration: 'none', display: 'block' }}>
+                  <div style={{ borderRadius: '16px', overflow: 'hidden', background: '#fff',
+                    border: '1px solid #f0ede6', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+                    <div style={{ height: '200px', overflow: 'hidden', position: 'relative',
+                      background: cp?.color ?? '#2d6a2d' }}>
+                      {(() => {
+                        const src = loc.image_url || (Array.isArray(loc.image_urls) && loc.image_urls[0])
+                        return src
+                          ? <img src={src} alt={loc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <div style={{ width: '100%', height: '100%',
+                              background: `linear-gradient(135deg, ${cp?.color ?? '#2d6a2d'}cc 0%, ${cp?.color ?? '#2d6a2d'}66 100%)`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>
+                              {loc.categories?.icon ?? '🗺️'}
+                            </div>
+                      })()}
+                      <div style={{ position: 'absolute', inset: 0,
+                        background: 'linear-gradient(to top,rgba(0,0,0,0.4) 0%,transparent 55%)' }} />
+                      <div style={{ position: 'absolute', bottom: '10px', left: '10px',
+                        background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(6px)',
+                        color: '#fff', fontSize: '0.7rem', fontWeight: 600,
+                        padding: '3px 10px', borderRadius: '999px' }}>
+                        {loc.categories?.icon} {loc.categories?.name}
+                      </div>
+                    </div>
+                    <div style={{ padding: '14px 16px 16px' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#8fa68f', marginBottom: '4px' }}>
+                        {loc.regions?.name ?? 'Srbija'}
+                      </div>
+                      <h3 style={{ fontFamily: SERIF, fontSize: '1rem', fontWeight: 700,
+                        color: '#0e1a0e', marginBottom: '6px', lineHeight: 1.3 }}>{loc.name}</h3>
+                      <p style={{ fontSize: '0.82rem', color: '#8fa68f', lineHeight: 1.5,
+                        display: '-webkit-box', WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{loc.short_description}</p>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* SHARE YOUR ADVENTURE */}
+      <section style={{ position: 'relative', overflow: 'hidden', padding: '100px 24px' }}>
+        <img src='https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&h=900&fit=crop&q=80'
+          alt='Planine' style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div style={{ position: 'absolute', inset: 0,
+          background: 'linear-gradient(135deg,rgba(14,26,14,0.85) 0%,rgba(30,61,30,0.78) 100%)' }} />
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '680px', margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ color: '#6ab87a', fontSize: '0.78rem', fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '16px' }}>Zajednica</p>
+          <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(2rem,4vw,3rem)', fontWeight: 900,
+            color: '#fff', lineHeight: 1.15, marginBottom: '20px',
+            textShadow: '0 2px 16px rgba(0,0,0,0.3)' }}>Share your next adventure</h2>
+          <p style={{ color: 'rgba(255,255,255,0.82)', fontSize: '1rem', lineHeight: 1.7,
+            marginBottom: '32px', maxWidth: '42ch', margin: '0 auto 32px' }}>
+            Znaš tajno ribolovno mesto, planinarsku stazu ili divlji kamp? Podeli ga sa zajednicom.
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px',
+            justifyContent: 'center', marginBottom: '40px' }}>
+            <Link href='/predlozi-lokaciju' style={{ background: '#fff', color: '#0e1a0e',
+              padding: '14px 34px', borderRadius: '999px', fontSize: '0.95rem',
+              fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}>
+              📍 Predloži lokaciju
+            </Link>
+            <Link href='/pretraga' style={{ background: 'transparent', color: '#fff',
+              padding: '14px 34px', borderRadius: '999px', fontSize: '0.95rem',
+              fontWeight: 600, textDecoration: 'none', border: '2px solid rgba(255,255,255,0.5)' }}>
+              Istraži lokacije
+            </Link>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', alignItems: 'center' }}>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', marginRight: '6px' }}>Prati nas:</p>
+            {[
+              { href: 'https://facebook.com/outdoorbalkans',  label: 'Facebook',  color: '#1877f2', path: 'M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z' },
+              { href: 'https://instagram.com/outdoorbalkans', label: 'Instagram', color: '#e1306c', path: 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z' },
+              { href: 'https://youtube.com/@outdoorbalkans',  label: 'YouTube',   color: '#ff0000', path: 'M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z' },
+              { href: 'https://tiktok.com/@outdoorbalkans',   label: 'TikTok',    color: '#fff',    path: 'M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.78a4.86 4.86 0 0 1-1.01-.09z' },
+            ].map(s => (
+              <a key={s.label} href={s.href} target='_blank' rel='noopener noreferrer'
+                style={{ width: '44px', height: '44px', borderRadius: '12px',
+                  background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: s.color, textDecoration: 'none' }}>
+                <svg viewBox='0 0 24 24' width='20' height='20' fill='currentColor'>
+                  <path d={s.path} />
+                </svg>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* GEAR UP */}
+      <GearCarousel />
+
+      {/* TOP LOKACIJE — Adventure anywhere stil */}
+      <section style={{ background: '#f9f7f2', padding: '72px 24px' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '52px' }}>
+            <p style={{ color: '#8fa68f', fontSize: '0.78rem', fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '10px' }}>
+              Otkriveno od zajednice
+            </p>
+            <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(1.8rem,3vw,2.4rem)',
+              fontWeight: 900, color: '#0e1a0e' }}>
+              Adventure anywhere
+            </h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: '40px' }}>
+            {cats.slice(0, 3).map((cat: any) => {
+              const cp  = CAT[cat.slug]
+              const top = locs.filter((l: any) => l.categories?.slug === cat.slug).slice(0, 8)
+              return (
+                <div key={cat.id}>
+                  <div style={{ display: 'flex', alignItems: 'center',
+                    justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <h3 style={{ fontFamily: SERIF, fontSize: '1.1rem', fontWeight: 700, color: '#0e1a0e' }}>
+                      Top {cat.name}
+                    </h3>
+                    <Link href={'/srbija/' + cat.slug} style={{ fontSize: '0.82rem',
+                      fontWeight: 600, color: '#2d6a2d', textDecoration: 'none' }}>Sve →</Link>
+                  </div>
+                  {top.length > 0 ? top.map((loc: any, idx: number) => (
+                    <Link key={loc.id}
+                      href={'/' + (loc.countries?.slug ?? 'srbija') + '/' + cat.slug + '/' + loc.slug}
+                      className='top-row'
+                      style={{ textDecoration: 'none', display: 'flex', alignItems: 'center',
+                        gap: '12px', padding: '10px 0',
+                        borderBottom: idx < top.length - 1 ? '1px solid #ede8df' : 'none' }}>
+                      <span style={{ fontFamily: SERIF, fontSize: '1rem', fontWeight: 700,
+                        color: '#d4cbbf', minWidth: '20px', textAlign: 'right' }}>
+                        {idx + 1}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0e1a0e',
+                          marginBottom: '1px', lineHeight: 1.3 }}>{loc.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: '#8fa68f' }}>
+                          {loc.regions?.name ?? 'Srbija'}
+                        </p>
+                      </div>
+                      <svg width='12' height='12' viewBox='0 0 24 24' fill='none'
+                        stroke='#ccc' strokeWidth='2'><path d='M9 18l6-6-6-6'/></svg>
+                    </Link>
+                  )) : (
+                    <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                      <p style={{ color: '#8fa68f', fontSize: '0.85rem' }}>
+                        {cat.icon} Uskoro — dodaj prvu lokaciju!
+                      </p>
+                      <Link href='/predlozi-lokaciju' style={{ display: 'inline-block',
+                        marginTop: '10px', fontSize: '0.82rem', fontWeight: 600,
+                        color: '#2d6a2d', textDecoration: 'none' }}>
+                        + Predloži lokaciju →
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ background: '#1e3d1e', padding: '48px 24px 32px' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px',
+            justifyContent: 'space-between', marginBottom: '40px' }}>
+            <div>
+              <div style={{ fontFamily: SERIF, fontSize: '1.3rem', fontWeight: 700,
+                color: '#f4f0e6', marginBottom: '8px' }}>OutdoorBalkans</div>
+              <p style={{ color: '#8fb898', fontSize: '0.85rem', maxWidth: '220px', lineHeight: 1.6 }}>
+                GPS direktorijum outdoor lokacija Balkana.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap' }}>
+              <div>
+                <p style={{ color: '#6ab87a', fontSize: '0.72rem', fontWeight: 700,
+                  letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px' }}>Istraži</p>
+                {[['/srbija/ribolov','Ribolov'],['/srbija/lov','Lov'],
+                  ['/srbija/kampovanje','Kampovanje'],['/srbija/planinarenje','Planinarenje'],
+                  ['/products','Oprema']].map(([h,l]) => (
+                  <div key={h} style={{ marginBottom: '8px' }}>
+                    <Link href={h} style={{ color: '#8fb898', fontSize: '0.88rem', textDecoration: 'none' }}>{l}</Link>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p style={{ color: '#6ab87a', fontSize: '0.72rem', fontWeight: 700,
+                  letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '12px' }}>Ostalo</p>
+                {[['/predlozi-lokaciju','Dodaj lokaciju'],['/kalendar-aktivnosti','Kalendar'],
+                  ['/kontakt','Kontakt'],['/admin','Admin']].map(([h,l]) => (
+                  <div key={h} style={{ marginBottom: '8px' }}>
+                    <Link href={h} style={{ color: '#8fb898', fontSize: '0.88rem', textDecoration: 'none' }}>{l}</Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '24px' }}>
+            <p style={{ color: 'rgba(143,184,152,0.5)', fontSize: '0.78rem' }}>
+              © 2025 OutdoorBalkans.com
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+
+
+
+
+================================================================
+End of Codebase
+================================================================
