@@ -84,7 +84,7 @@ export default function LocationsNearby({ catData }: Props) {
                     <div style={{ height: '200px', overflow: 'hidden', position: 'relative',
                       background: cp?.color ?? '#2d6a2d' }}>
                       {loc.image_url
-                        ? <img src={loc.image_url} alt={loc.name}
+                        ? <img src={getCardPhoto(loc.slug ?? l.slug ?? '', loc.image_url, loc.categories?.slug ?? '')} alt={loc.name}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         : <div style={{ width: '100%', height: '100%',
                               background: `linear-gradient(135deg, ${cp?.color ?? '#2d6a2d'}cc 0%, ${cp?.color ?? '#2d6a2d'}66 100%)`,
