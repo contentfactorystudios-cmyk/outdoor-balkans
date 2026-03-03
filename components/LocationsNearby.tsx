@@ -1,4 +1,5 @@
 'use client'
+import { getCardPhoto } from '@/lib/getCategoryPhoto'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
