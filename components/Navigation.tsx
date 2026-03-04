@@ -177,7 +177,7 @@ export default function Navigation() {
                   <span style={{ fontSize: '1.6rem' }}>📅</span>
                   <div>
                     <p style={{ margin: 0, fontWeight: 700, fontSize: '0.88rem', color: '#0e1a0e' }}>
-                      Prijavi događaj
+                      Predloži događaj
                     </p>
                     <p style={{ margin: 0, fontSize: '0.75rem', color: '#8fa68f' }}>
                       Takmičenje, festival, izlazak

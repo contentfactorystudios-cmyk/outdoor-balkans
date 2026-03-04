@@ -133,7 +133,7 @@ export default function DodajDogadjaj() {
           <span style={{ color: '#d4cbbf' }}>›</span>
           <Link href='/kalendar-aktivnosti' style={{ color: '#8fa68f', fontSize: '0.82rem', textDecoration: 'none' }}>Kalendar</Link>
           <span style={{ color: '#d4cbbf' }}>›</span>
-          <span style={{ color: '#0e1a0e', fontSize: '0.82rem', fontWeight: 600 }}>Prijavi događaj</span>
+          <span style={{ color: '#0e1a0e', fontSize: '0.82rem', fontWeight: 600 }}>Predloži događaj</span>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -210,7 +210,7 @@ export default function DodajDogadjaj() {
                 borderRadius: '16px', padding: '16px', fontSize: '1rem', fontWeight: 700,
                 cursor: loading ? 'not-allowed' : 'pointer', fontFamily: SANS,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              {loading ? '⏳ Šaljem...' : '📅 Prijavi događaj'}
+              {loading ? '⏳ Šaljem...' : '📅 Predloži događaj'}
             </button>
 
             <p style={{ textAlign: 'center', color: '#8fa68f', fontSize: '0.8rem', margin: 0 }}>

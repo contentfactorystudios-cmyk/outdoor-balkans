@@ -92,7 +92,7 @@ export default function DodajPage() {
               }}>
               <div style={{ fontSize:'3.5rem', marginBottom:'16px' }}>📅</div>
               <h2 style={{ fontFamily:SERIF, fontSize:'1.3rem', fontWeight:800,
-                color:'#0e1a0e', marginBottom:'10px' }}>Prijavi događaj</h2>
+                color:'#0e1a0e', marginBottom:'10px' }}>Predloži događaj</h2>
               <p style={{ color:'#8fa68f', fontSize:'0.88rem', lineHeight:1.6,
                 marginBottom:'20px' }}>
                 Takmičenje, tournament, grupni pohod, festival ili sezonski izlazak.
@@ -107,7 +107,7 @@ export default function DodajPage() {
               </div>
               <div style={{ background:'#1d5fa8', color:'#fff', padding:'12px 24px',
                 borderRadius:'12px', fontWeight:700, fontSize:'0.9rem', display:'inline-block' }}>
-                Prijavi događaj →
+                Predloži događaj →
               </div>
             </div>
           </Link>

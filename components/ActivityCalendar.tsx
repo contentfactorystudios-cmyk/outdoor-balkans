@@ -627,7 +627,7 @@ export default function ActivityCalendar({ locations, addEventLink }: { location
     <div style={{fontFamily:SANS,background:'#f9f7f2',minHeight:'100vh'}}>
 
       {/* HERO */}
-      <div style={{position:'relative',height:'300px',overflow:'hidden'}}>
+      <div style={{position:'relative',height:'340px',overflow:'hidden'}}>
         <img
           src='https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?w=1920&h=600&fit=crop&q=80'
           alt='Kalendar aktivnosti'
@@ -666,22 +666,18 @@ export default function ActivityCalendar({ locations, addEventLink }: { location
                 border:'1px solid rgba(255,255,255,0.35)',backdropFilter:'blur(8px)',
                 whiteSpace:'nowrap',display:'inline-flex',alignItems:'center',gap:'8px',
                 flexShrink:0}}>
-              📅 + Prijavi događaj
+              📅 + Predloži događaj
             </a>
           </div>
         </div>
-        <div style={{position:'absolute',bottom:-1,left:0,right:0}}>
-          <svg viewBox='0 0 1440 30' preserveAspectRatio='none'
-            style={{display:'block',width:'100%',height:'30px'}}>
-            <path d='M0 30 C360 5 1080 25 1440 10 L1440 30 Z' fill='#f9f7f2'/>
-          </svg>
-        </div>
+
       </div>
 
       {/* STICKY FILTER BAR */}
-      <div style={{background:'#fff',borderBottom:'1px solid #f0ede6',
+      <div style={{background:'rgba(255,255,255,0.85)',backdropFilter:'blur(12px)',
+        borderBottom:'1px solid rgba(255,255,255,0.3)',
         padding:'12px 24px',position:'sticky',top:'64px',zIndex:50,
-        boxShadow:'0 2px 8px rgba(0,0,0,0.04)'}}>
+        boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
         <div style={{maxWidth:'1200px',margin:'0 auto'}}>
           <FilterBar/>
         </div>

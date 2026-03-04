@@ -261,7 +261,7 @@ export default function PredloziLokaciju() {
             </p>
             <Link href='/dodaj-dogadjaj'
               style={{ color:'#2d6a2d', fontWeight:700, fontSize:'0.88rem', textDecoration:'none' }}>
-              Prijavi događaj →
+              Predloži događaj →
             </Link>
           </div>
         </div>
