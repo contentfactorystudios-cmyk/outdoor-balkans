@@ -8,7 +8,8 @@ export const supabase = createClient(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      storageKey: 'ob-auth',
+      storageKey: 'ob-auth-v2',
+      lock: undefined,
     }
   }
 )
