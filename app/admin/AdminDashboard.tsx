@@ -40,7 +40,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
       if (!session) window.location.href = '/admin/login'
     })
   }, [])
-  type Tab = 'locations' | 'add' | 'csv'
+  type Tab = 'locations' | 'add' | 'csv' | 'proposals'
   const [tab, setTab] = useState<Tab>('locations')
   const [form, setForm] = useState({ ...EMPTY })
   const [saving, setSaving] = useState(false)
@@ -51,9 +51,70 @@ export default function AdminDashboard({ user, countries, categories, regions, l
   const [csvMsg, setCsvMsg] = useState('')
   const [csvImporting, setCsvImporting] = useState(false)
   const [csvErrors, setCsvErrors] = useState<string[]>([])
+  const [proposals, setProposals] = useState<any[]>([])
+  const [proposalsLoading, setProposalsLoading] = useState(false)
+  const [proposalMsg, setProposalMsg] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const ic = `w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white`
+  async function loadProposals() {
+    setProposalsLoading(true)
+    const { data } = await supabase
+      .from('location_proposals')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setProposals(data ?? [])
+    setProposalsLoading(false)
+  }
+
+  async function approveProposal(prop: any) {
+    setProposalMsg('⏳ Odobravam...')
+    // Napravi lokaciju iz predloga
+    const cat = categories.find(c => c.slug === prop.category_slug || c.name === prop.category)
+    const country = countries.find(c => c.name === prop.country || c.slug === 'srbija')
+    const region  = regions.find(r => r.name === prop.region) ?? regions[0]
+
+    const slug = (prop.ai_name || prop.geo_name || prop.name || 'lokacija')
+      .toLowerCase()
+      .replace(/[čć]/g,'c').replace(/[šđ]/g,'s').replace(/ž/g,'z')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+      + '-' + prop.id
+
+    const { error } = await supabase.from('locations').insert({
+      name:              prop.ai_name || prop.geo_name || prop.name,
+      slug,
+      short_description: prop.ai_short_description || prop.description || '',
+      description:       prop.ai_description || prop.description || '',
+      lat:               prop.lat,
+      lng:               prop.lng,
+      category_id:       cat?.id ?? null,
+      country_id:        country?.id ?? null,
+      region_id:         region?.id ?? null,
+      is_published:      true,
+      is_featured:       false,
+      best_season:       prop.ai_best_season || '',
+      permit_required:   prop.ai_permit_required ?? false,
+      image_url:         prop.photo_urls?.[0] ?? null,
+    })
+
+    if (error) { setProposalMsg('❌ Greška: ' + error.message); return }
+
+    await supabase.from('location_proposals')
+      .update({ status: 'approved', reviewed_at: new Date().toISOString() })
+      .eq('id', prop.id)
+
+    setProposalMsg('✅ Lokacija objavljena!')
+    loadProposals()
+  }
+
+  async function rejectProposal(id: number, adminNote: string) {
+    await supabase.from('location_proposals')
+      .update({ status: 'rejected', admin_note: adminNote, reviewed_at: new Date().toISOString() })
+      .eq('id', id)
+    setProposalMsg('Predlog odbijen.')
+    loadProposals()
+  }
+
+    const ic = `w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white`
   const lc = `block text-sm font-medium text-gray-700 mb-1`
 
   async function handleAIGenerate() {
@@ -150,6 +211,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     { id: 'locations', label: `📋 Lokacije (${locations.length})` },
     { id: 'add', label: '✨ Dodaj + AI' },
     { id: 'csv', label: '📥 CSV Import' },
+    { id: 'proposals', label: `🔔 Predlozi${proposals.length > 0 ? ` (${proposals.filter(p=>p.status==='pending').length})` : ''}` },
   ]
 
   return (
@@ -352,7 +414,45 @@ export default function AdminDashboard({ user, countries, categories, regions, l
           </form>
         )}
 
-        {tab === 'csv' && (
+        {tab === 'proposals' && (
+        <div style={{ padding:'8px 0' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px' }}>
+            <h2 className="text-xl font-bold text-gray-800">🔔 Predlozi lokacija</h2>
+            <button onClick={loadProposals}
+              style={{ border:'1px solid #e5e7eb', background:'#fff', borderRadius:'8px',
+                padding:'6px 14px', fontSize:'0.82rem', cursor:'pointer', fontWeight:600 }}>
+              ↻ Osvježi
+            </button>
+          </div>
+          {proposalMsg && (
+            <div style={{ background: proposalMsg.startsWith('✅') ? '#d1fae5' : proposalMsg.startsWith('❌') ? '#fee2e2' : '#fef3c7',
+              borderRadius:'10px', padding:'10px 16px', marginBottom:'16px',
+              fontWeight:600, fontSize:'0.88rem',
+              color: proposalMsg.startsWith('✅') ? '#065f46' : proposalMsg.startsWith('❌') ? '#991b1b' : '#92400e' }}>
+              {proposalMsg}
+            </div>
+          )}
+          {proposalsLoading ? (
+            <div style={{ textAlign:'center', padding:'40px', color:'#9ca3af' }}>⏳ Učitavam...</div>
+          ) : proposals.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'60px', color:'#9ca3af' }}>
+              <div style={{ fontSize:'2.5rem', marginBottom:'12px' }}>📭</div>
+              <p style={{ fontWeight:600 }}>Nema predloga</p>
+              <p style={{ fontSize:'0.85rem', marginTop:'4px' }}>Novi predlozi će se pojaviti ovdje</p>
+            </div>
+          ) : (
+            <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+              {proposals.map((prop: any) => (
+                <ProposalCard key={prop.id} prop={prop}
+                  categories={categories} countries={countries} regions={regions}
+                  onApprove={approveProposal} onReject={rejectProposal} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'csv' && (
           <div className="space-y-6">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4">📥 CSV Import</h2>

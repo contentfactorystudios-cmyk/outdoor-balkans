@@ -106,11 +106,15 @@ export default function SmartProposalClient() {
     }
 
     await supabase.from('location_proposals').insert({
-      user_id:       user?.id ?? null,
-      user_email:    user?.email ?? 'anonimno',
+      submitted_by:  user?.id ?? null,
+      email:         user?.email ?? null,
+      name:          geoData.name,
+      category:      category.label,
+      category_slug: category.slug,
+      country:       geoData.country ?? 'Srbija',
+      region:        geoData.region ?? '',
       lat:           coords!.lat,
       lng:           coords!.lng,
-      category_slug: category.slug,
       note,
       geo_name:      geoData.name,
       geo_region:    geoData.region,
