@@ -9,31 +9,24 @@ interface Props {
 }
 
 export default function LocationsNearby({ catData }: Props) {
-  const [city, setCity]   = useState<string>('')
-  const [locs, setLocs]   = useState<any[]>([])
+  const [city, setCity]       = useState<string>('')
+  const [locs, setLocs]       = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const SERIF = "'Fraunces','Playfair Display',Georgia,serif"
 
   useEffect(() => {
-    // Dohvati grad iz IP-a (besplatni API)
     fetch('https://ipapi.co/json/')
       .then(r => r.json())
-      .then(d => {
-        const c = d.city || d.region || 'Beograda'
-        setCity(c)
-      })
+      .then(d => setCity(d.city || d.region || 'Beograda'))
       .catch(() => setCity('Beograda'))
 
-    // Dohvati lokacije (najbliže — po created_at za sada, PostGIS u v2)
     supabase
       .from('locations')
       .select('id,name,slug,short_description,image_url,categories(name,slug,icon),countries(name,slug),regions(name)')
       .eq('is_published', true)
       .order('is_featured', { ascending: false })
       .limit(4)
-      .then(({ data }) => {
-        setLocs(data ?? [])
-        setLoading(false)
-      })
+      .then(({ data }) => { setLocs(data ?? []); setLoading(false) })
   }, [])
 
   if (!loading && locs.length === 0) return null
@@ -46,8 +39,8 @@ export default function LocationsNearby({ catData }: Props) {
             textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '10px' }}>
             Preporučeno u tvojoj blizini
           </p>
-          <h2 style={{ fontFamily: "'Fraunces','Playfair Display',Georgia,serif",
-            fontSize: 'clamp(1.4rem,2.5vw,1.9rem)', fontWeight: 700, color: '#0e1a0e', marginBottom: '8px' }}>
+          <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(1.4rem,2.5vw,1.9rem)',
+            fontWeight: 700, color: '#0e1a0e', marginBottom: '8px' }}>
             {loading ? 'Učitavam lokacije...' : `Preporučeno u blizini — ${city}`}
           </h2>
           <Link href='/pretraga' style={{ fontSize: '0.88rem', fontWeight: 600,
@@ -81,12 +74,16 @@ export default function LocationsNearby({ catData }: Props) {
                   href={'/' + (loc.countries?.slug ?? 'srbija') + '/' + cs + '/' + loc.slug}
                   className='loc-card' style={{ textDecoration: 'none', display: 'block' }}>
                   <div style={{ borderRadius: '16px', overflow: 'hidden', background: '#fff',
-                    border: '1px solid #f0ede6', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+                    border: '1px solid #f0ede6', boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                    transition: 'transform 0.2s, box-shadow 0.2s' }}>
                     <div style={{ height: '200px', overflow: 'hidden', position: 'relative',
                       background: cp?.color ?? '#2d6a2d' }}>
-                      <img src={getCardPhoto(loc.slug ?? '', loc.image_url, loc.categories?.slug ?? '')}
+                      <img
+                        src={getCardPhoto(loc.slug ?? '', loc.image_url, cs)}
                         alt={loc.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0' }}
+                      />
                       <div style={{ position: 'absolute', inset: 0,
                         background: 'linear-gradient(to top,rgba(0,0,0,0.4) 0%,transparent 55%)' }} />
                       <div style={{ position: 'absolute', bottom: '10px', left: '10px',
@@ -104,9 +101,8 @@ export default function LocationsNearby({ catData }: Props) {
                         </svg>
                         {loc.regions?.name ?? 'Srbija'}
                       </div>
-                      <h3 style={{ fontFamily: "'Fraunces','Playfair Display',Georgia,serif",
-                        fontSize: '1rem', fontWeight: 700, color: '#0e1a0e',
-                        marginBottom: '6px', lineHeight: 1.3 }}>{loc.name}</h3>
+                      <h3 style={{ fontFamily: SERIF, fontSize: '1rem', fontWeight: 700,
+                        color: '#0e1a0e', marginBottom: '6px', lineHeight: 1.3 }}>{loc.name}</h3>
                       <p style={{ fontSize: '0.82rem', color: '#8fa68f', lineHeight: 1.5,
                         display: '-webkit-box', WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>

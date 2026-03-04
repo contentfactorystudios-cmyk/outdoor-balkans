@@ -90,24 +90,36 @@ export default async function HomePage() {
             scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
             justifyContent: 'center', flexWrap: 'nowrap' }}>
             {cats.map((cat: any) => {
-              // Normalize rezervati → nacionalni-parkovi
               if (cat.slug === 'rezervati') { cat = {...cat, slug: 'nacionalni-parkovi', name: 'Nacionalni parkovi'} }
               const p = CAT[cat.slug]
               return (
                 <Link key={cat.id} href={'/srbija/' + cat.slug}
-                  style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-                  <div className='cat-circle' style={{ width: '150px', height: '150px',
-                    borderRadius: '50%', overflow: 'hidden', background: p?.color ?? '#2d6a2d',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.14)' }}>
-                    {p?.photo
-                      ? <img src={p.photo} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <div style={{ width: '100%', height: '100%', display: 'flex',
-                          alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>{cat.icon}</div>
-                    }
+                  className='cat-card-link'
+                  style={{ textDecoration: 'none', flexShrink: 0, display: 'block', width: '160px' }}>
+                  <div className='cat-card' style={{
+                    width: '160px', height: '200px', borderRadius: '24px',
+                    overflow: 'hidden', position: 'relative',
+                    background: p?.color ?? '#2d6a2d',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                    transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+                  }}>
+                    {p?.photo && (
+                      <img src={p.photo} alt={cat.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover',
+                          transition: 'transform 0.4s ease' }} />
+                    )}
+                    <div style={{ position: 'absolute', inset: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.05) 60%, transparent 100%)' }} />
+                    <div style={{ position: 'absolute', top: '14px', left: '14px',
+                      fontSize: '1.8rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
+                      {cat.icon}
+                    </div>
+                    <div style={{ position: 'absolute', bottom: '14px', left: '14px', right: '14px' }}>
+                      <p style={{ color: '#fff', fontSize: '0.92rem', fontWeight: 700,
+                        fontFamily: SERIF, lineHeight: 1.2, margin: 0,
+                        textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>{cat.name}</p>
+                    </div>
                   </div>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0e1a0e',
-                    textAlign: 'center', whiteSpace: 'nowrap' }}>{cat.name}</span>
                 </Link>
               )
             })}
