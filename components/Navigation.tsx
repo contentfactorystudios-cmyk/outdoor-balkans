@@ -38,6 +38,7 @@ export default function Navigation() {
   const explore  = useDropdown()
   const langDrop = useDropdown()
   const userDrop = useDropdown()
+  const addDrop  = useDropdown()
   const router   = useRouter()
   const pathname = usePathname()
   const isHome   = pathname === '/'

@@ -2,198 +2,270 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import type { Metadata } from 'next'
+
+const SERIF = "'Fraunces','Playfair Display',Georgia,serif"
+const SANS  = "'DM Sans',system-ui,sans-serif"
+
+const CATEGORIES = [
+  { value: 'ribolov',            label: '🎣 Ribolov' },
+  { value: 'lov',                label: '🦌 Lov' },
+  { value: 'kajak',              label: '🚣 Kajak' },
+  { value: 'kampovanje',         label: '⛺ Kampovanje' },
+  { value: 'planinarenje',       label: '🥾 Planinarenje' },
+  { value: 'nacionalni-parkovi', label: '🦋 Nac. parkovi' },
+]
+const COUNTRIES = [
+  { value: 'srbija',    label: '🇷🇸 Srbija' },
+  { value: 'hrvatska',  label: '🇭🇷 Hrvatska' },
+  { value: 'bosna',     label: '🇧🇦 Bosna i Hercegovina' },
+  { value: 'crna-gora', label: '🇲🇪 Crna Gora' },
+  { value: 'slovenija', label: '🇸🇮 Slovenija' },
+  { value: 'makedonija',label: '🇲🇰 Makedonija' },
+]
+const CAT_COLOR: Record<string,string> = {
+  ribolov:'#1d5fa8', lov:'#5a3010', kajak:'#0e7490',
+  kampovanje:'#166534', planinarenje:'#5b21b6', 'nacionalni-parkovi':'#0f766e',
+}
 
 export default function PredloziLokaciju() {
   const [form, setForm] = useState({
-    name: '', category: 'ribolov', country: 'srbija',
-    region: '', lat: '', lng: '', description: '', contact: '',
+    name:'', category:'ribolov', country:'srbija',
+    region:'', lat:'', lng:'', description:'', contact:'',
   })
-  const [loading,  setLoading]  = useState(false)
-  const [success,  setSuccess]  = useState(false)
-  const [error,    setError]    = useState('')
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error,   setError]   = useState('')
 
-  const ic = `w-full border border-gray-200 rounded-xl px-4 py-3 text-sm
-              focus:outline-none focus:ring-2 focus:ring-green-500 bg-white`
-  const lc = `block text-sm font-medium text-gray-700 mb-1`
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+  const color = CAT_COLOR[form.category] ?? '#2d6a2d'
+
+  const inputStyle: React.CSSProperties = {
+    width:'100%', border:'1.5px solid #e8e2d4', borderRadius:'14px',
+    padding:'13px 16px', fontSize:'0.95rem', fontFamily:SANS,
+    outline:'none', background:'#fff', color:'#0e1a0e', boxSizing:'border-box',
+  }
+  const labelStyle: React.CSSProperties = {
+    display:'block', fontSize:'0.82rem', fontWeight:700,
+    color:'#3d4d3d', marginBottom:'7px',
+  }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true); setError('')
-
-    const { error } = await supabase.from('location_proposals').insert({
-      name:        form.name,
-      category:    form.category,
-      country:     form.country,
-      region:      form.region     || null,
-      lat:         form.lat        ? parseFloat(form.lat)  : null,
-      lng:         form.lng        ? parseFloat(form.lng)  : null,
+    e.preventDefault(); setLoading(true); setError('')
+    if (!form.name.trim()) { setError('Naziv je obavezan.'); setLoading(false); return }
+    const { error: err } = await supabase.from('location_proposals').insert({
+      name: form.name, category: form.category, country: form.country,
+      region: form.region || null,
+      lat: form.lat ? parseFloat(form.lat) : null,
+      lng: form.lng ? parseFloat(form.lng) : null,
       description: form.description || null,
-      contact:     form.contact    || null,
+      contact: form.contact || null,
     })
-
-    if (error) {
-      setError('Greška pri slanju. Pokušaj ponovo.')
-      setLoading(false)
-      return
-    }
-
-    setSuccess(true)
-    setLoading(false)
+    if (err) { setError('Greška: ' + err.message); setLoading(false); return }
+    setSuccess(true); setLoading(false)
   }
 
   if (success) return (
-    <main className="max-w-2xl mx-auto px-4 py-16 text-center">
-      <div className="bg-white rounded-2xl shadow-sm border p-10">
-        <div className="text-6xl mb-4">🎉</div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-3">Hvala na predlogu!</h1>
-        <p className="text-gray-500 mb-2">
-          Tvoja lokacija <strong>{form.name}</strong> je primljena.
+    <div style={{ fontFamily:SANS, minHeight:'100vh', background:'#f9f7f2',
+      display:'flex', alignItems:'center', justifyContent:'center', padding:'24px' }}>
+      <div style={{ background:'#fff', borderRadius:'28px', padding:'56px 40px',
+        textAlign:'center', maxWidth:'480px', width:'100%',
+        boxShadow:'0 8px 40px rgba(0,0,0,0.08)', border:'1px solid #f0ede6' }}>
+        <div style={{ fontSize:'4rem', marginBottom:'16px' }}>🎉</div>
+        <h1 style={{ fontFamily:SERIF, fontSize:'1.8rem', fontWeight:800, color:'#0e1a0e', marginBottom:'12px' }}>
+          Hvala na predlogu!
+        </h1>
+        <p style={{ color:'#8fa68f', lineHeight:1.7, marginBottom:'8px' }}>
+          Lokacija <strong style={{ color:'#0e1a0e' }}>{form.name}</strong> je primljena.
         </p>
-        <p className="text-gray-400 text-sm mb-8">
-          Naš admin tim će pregledati predlog i dodati ga u bazu u roku od 48 sati.
+        <p style={{ color:'#8fa68f', fontSize:'0.88rem', marginBottom:'36px' }}>
+          Naš tim će pregledati i dodati je u bazu u roku od 48h.
         </p>
-        <div className="flex justify-center gap-3">
+        <div style={{ display:'flex', gap:'12px', justifyContent:'center', flexWrap:'wrap' }}>
           <button onClick={() => { setSuccess(false); setForm({ name:'',category:'ribolov',country:'srbija',region:'',lat:'',lng:'',description:'',contact:'' }) }}
-            className="border border-green-700 text-green-700 px-5 py-2.5 rounded-xl font-medium hover:bg-green-50">
+            style={{ padding:'12px 24px', borderRadius:'14px', border:`2px solid ${color}`,
+              background:'transparent', color, fontWeight:700, cursor:'pointer', fontSize:'0.9rem', fontFamily:SANS }}>
             Predloži još jednu
           </button>
-          <Link href="/"
-            className="bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-green-800">
+          <Link href='/'
+            style={{ padding:'12px 24px', borderRadius:'14px', background:color,
+              color:'#fff', fontWeight:700, textDecoration:'none', fontSize:'0.9rem' }}>
             Vrati se na početnu
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   )
 
   return (
-    <main className="max-w-2xl mx-auto px-4 py-10">
-
-      {/* Header */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100
-                        rounded-2xl text-3xl mb-4">📍</div>
-        <h1 className="text-3xl font-bold text-gray-900">Predloži Lokaciju</h1>
-        <p className="text-gray-500 mt-2">
-          Znaš dobro mesto za ribolov ili lov? Podeli ga sa zajednicom!
-        </p>
+    <div style={{ fontFamily:SANS, minHeight:'100vh', background:'#f9f7f2' }}>
+      <div style={{ background:`linear-gradient(135deg, ${color}dd 0%, ${color}99 100%)`,
+        padding:'72px 24px 56px', textAlign:'center', position:'relative', overflow:'hidden' }}>
+        <div style={{ position:'absolute', inset:0, opacity:0.06,
+          backgroundImage:'radial-gradient(circle, #fff 1px, transparent 1px)',
+          backgroundSize:'24px 24px' }} />
+        <div style={{ position:'relative' }}>
+          <div style={{ display:'inline-flex', alignItems:'center', justifyContent:'center',
+            width:'72px', height:'72px', background:'rgba(255,255,255,0.2)',
+            borderRadius:'22px', fontSize:'2rem', marginBottom:'20px',
+            backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.3)' }}>📍</div>
+          <h1 style={{ fontFamily:SERIF, fontSize:'clamp(1.8rem,4vw,2.8rem)',
+            fontWeight:900, color:'#fff', marginBottom:'12px',
+            textShadow:'0 2px 16px rgba(0,0,0,0.2)' }}>
+            Predloži Lokaciju
+          </h1>
+          <p style={{ color:'rgba(255,255,255,0.88)', fontSize:'1rem',
+            maxWidth:'480px', margin:'0 auto', lineHeight:1.7 }}>
+            Znaš dobro mesto za ribolov, lov ili planinarenje? Podeli ga sa zajednicom Balkana!
+          </p>
+        </div>
       </div>
 
-      {/* Info banner */}
-      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-8 flex gap-3">
-        <span className="text-2xl shrink-0">ℹ️</span>
-        <div className="text-sm text-blue-800">
-          <p className="font-semibold mb-1">Kako funkcioniše?</p>
-          <p>Popuni formu i pošalji predlog. Naš tim pregleda svaki predlog i dodaje ga u bazu.
-             GPS koordinate možeš naći desnim klikom na Google Maps.</p>
-        </div>
+      <div style={{ marginTop:'-1px' }}>
+        <svg viewBox='0 0 1440 40' preserveAspectRatio='none' style={{ width:'100%', height:'40px', display:'block' }}>
+          <path d='M0 40 C480 0 960 30 1440 10 L1440 40 Z' fill='#f9f7f2'/>
+        </svg>
       </div>
 
-      <form onSubmit={handleSubmit}
-        className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-
-        {/* Naziv */}
-        <div>
-          <label className={lc}>Naziv lokacije *</label>
-          <input type="text" value={form.name} required className={ic}
-            placeholder="npr. Ribnjak kod Aranđelovca"
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+      <div style={{ maxWidth:'640px', margin:'0 auto', padding:'32px 24px 80px' }}>
+        <div style={{ display:'flex', gap:'8px', alignItems:'center', marginBottom:'28px' }}>
+          <Link href='/' style={{ color:'#8fa68f', fontSize:'0.82rem', textDecoration:'none' }}>Početna</Link>
+          <span style={{ color:'#d4cbbf' }}>›</span>
+          <span style={{ color:'#0e1a0e', fontSize:'0.82rem', fontWeight:600 }}>Predloži lokaciju</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Kategorija */}
+        {/* Info box */}
+        <div style={{ background:'rgba(29,95,168,0.08)', border:'1px solid rgba(29,95,168,0.2)',
+          borderRadius:'16px', padding:'16px 20px', marginBottom:'24px',
+          display:'flex', gap:'12px', alignItems:'flex-start' }}>
+          <span style={{ fontSize:'1.4rem', flexShrink:0 }}>ℹ️</span>
           <div>
-            <label className={lc}>Aktivnost *</label>
-            <select value={form.category} className={ic}
-              onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-              <option value="ribolov">🎣 Ribolov</option>
-              <option value="lov">🦌 Lov</option>
-            </select>
+            <p style={{ fontWeight:700, color:'#1d5fa8', fontSize:'0.88rem', marginBottom:'4px' }}>Kako funkcioniše?</p>
+            <p style={{ color:'#3d4d3d', fontSize:'0.84rem', lineHeight:1.6 }}>
+              Popuni formu i pošalji predlog. Tim pregleda svaki predlog i dodaje ga u bazu.
+              GPS koordinate nađeš desnim klikom na Google Maps → "Šta se ovde nalazi".
+            </p>
           </div>
+        </div>
 
-          {/* Država */}
+        <form onSubmit={handleSubmit}>
+          <div style={{ background:'#fff', borderRadius:'24px', padding:'36px',
+            border:'1px solid #f0ede6', boxShadow:'0 4px 24px rgba(0,0,0,0.06)',
+            display:'flex', flexDirection:'column', gap:'24px' }}>
+
+            {/* Kategorija */}
+            <div>
+              <label style={labelStyle}>Aktivnost *</label>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'8px' }}>
+                {CATEGORIES.map(cat => (
+                  <button key={cat.value} type='button' onClick={() => set('category', cat.value)}
+                    style={{ padding:'10px 6px', borderRadius:'12px', fontSize:'0.8rem',
+                      fontWeight: form.category === cat.value ? 700 : 500, cursor:'pointer',
+                      border:`2px solid ${form.category === cat.value ? CAT_COLOR[cat.value] : '#e8e2d4'}`,
+                      background: form.category === cat.value ? CAT_COLOR[cat.value]+'18' : '#fff',
+                      color: form.category === cat.value ? CAT_COLOR[cat.value] : '#3d4d3d',
+                      fontFamily:SANS, transition:'all 0.15s' }}>
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Naziv */}
+            <div>
+              <label style={labelStyle}>Naziv lokacije *</label>
+              <input value={form.name} onChange={e => set('name', e.target.value)}
+                placeholder='npr. Ribnjak kod Aranđelovca' required style={inputStyle} />
+            </div>
+
+            {/* Država */}
+            <div>
+              <label style={labelStyle}>Država</label>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'8px' }}>
+                {COUNTRIES.map(c => (
+                  <button key={c.value} type='button' onClick={() => set('country', c.value)}
+                    style={{ padding:'9px 12px', borderRadius:'12px', fontSize:'0.82rem', textAlign:'left',
+                      fontWeight: form.country === c.value ? 700 : 400, cursor:'pointer',
+                      border:`2px solid ${form.country === c.value ? color : '#e8e2d4'}`,
+                      background: form.country === c.value ? color+'12' : '#fff',
+                      color: form.country === c.value ? color : '#3d4d3d',
+                      fontFamily:SANS, transition:'all 0.15s' }}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Region */}
+            <div>
+              <label style={labelStyle}>Region / Oblast</label>
+              <input value={form.region} onChange={e => set('region', e.target.value)}
+                placeholder='npr. Šumadija, Vojvodina, Zlatibor...' style={inputStyle} />
+            </div>
+
+            {/* GPS */}
+            <div>
+              <label style={labelStyle}>GPS Koordinate</label>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+                <input value={form.lat} onChange={e => set('lat', e.target.value)}
+                  placeholder='Latitude (npr. 44.1234)' style={inputStyle} />
+                <input value={form.lng} onChange={e => set('lng', e.target.value)}
+                  placeholder='Longitude (npr. 20.5678)' style={inputStyle} />
+              </div>
+              <p style={{ fontSize:'0.76rem', color:'#8fa68f', marginTop:'6px' }}>
+                💡 Desni klik na Google Maps → kopiraj koordinate
+              </p>
+            </div>
+
+            {/* Opis */}
+            <div>
+              <label style={labelStyle}>Opis lokacije</label>
+              <textarea value={form.description} onChange={e => set('description', e.target.value)}
+                placeholder='Što više detalja — pristup, sezone, posebnosti...' rows={4}
+                style={{ ...inputStyle, resize:'vertical', minHeight:'110px' }} />
+            </div>
+
+            {/* Kontakt */}
+            <div>
+              <label style={labelStyle}>Kontakt (opciono)</label>
+              <input value={form.contact} onChange={e => set('contact', e.target.value)}
+                placeholder='email ili telefon' style={inputStyle} />
+            </div>
+
+            {error && (
+              <div style={{ background:'#fef2f2', border:'1px solid #fecaca',
+                borderRadius:'12px', padding:'14px 16px', color:'#dc2626', fontSize:'0.88rem' }}>
+                ⚠️ {error}
+              </div>
+            )}
+
+            <button type='submit' disabled={loading}
+              style={{ background: loading ? '#ccc' : color, color:'#fff', border:'none',
+                borderRadius:'16px', padding:'16px', fontSize:'1rem', fontWeight:700,
+                cursor: loading ? 'not-allowed' : 'pointer', fontFamily:SANS,
+                display:'flex', alignItems:'center', justifyContent:'center', gap:'8px' }}>
+              {loading ? '⏳ Šaljem...' : '📍 Pošalji predlog'}
+            </button>
+            <p style={{ textAlign:'center', color:'#8fa68f', fontSize:'0.8rem', margin:0 }}>
+              Svaki predlog prolazi manuelnu proveru pre objavljivanja.
+            </p>
+          </div>
+        </form>
+
+        {/* Link na dodaj dogadjaj */}
+        <div style={{ marginTop:'20px', background:'#fff', borderRadius:'20px', padding:'22px',
+          border:'1px solid #f0ede6', display:'flex', alignItems:'center', gap:'16px' }}>
+          <div style={{ fontSize:'2rem' }}>📅</div>
           <div>
-            <label className={lc}>Država *</label>
-            <select value={form.country} className={ic}
-              onChange={e => setForm(f => ({ ...f, country: e.target.value }))}>
-              <option value="srbija">Srbija</option>
-              <option value="hrvatska">Hrvatska</option>
-              <option value="bosna">Bosna i Hercegovina</option>
-              <option value="crna-gora">Crna Gora</option>
-              <option value="slovenija">Slovenija</option>
-              <option value="severna-makedonija">Severna Makedonija</option>
-              <option value="albanija">Albanija</option>
-              <option value="bugarska">Bugarska</option>
-            </select>
+            <p style={{ fontWeight:700, color:'#0e1a0e', fontSize:'0.95rem', marginBottom:'4px' }}>
+              Imaš outdoor događaj?
+            </p>
+            <Link href='/dodaj-dogadjaj'
+              style={{ color:'#2d6a2d', fontWeight:700, fontSize:'0.88rem', textDecoration:'none' }}>
+              Prijavi događaj →
+            </Link>
           </div>
         </div>
-
-        {/* Region */}
-        <div>
-          <label className={lc}>Region / Oblast (opciono)</label>
-          <input type="text" value={form.region} className={ic}
-            placeholder="npr. Šumadija, Vojvodina, Zlatibor..."
-            onChange={e => setForm(f => ({ ...f, region: e.target.value }))} />
-        </div>
-
-        {/* GPS */}
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-          <p className="text-sm font-semibold text-blue-900 mb-1">
-            🗺️ GPS Koordinate (opciono ali veoma korisno!)
-          </p>
-          <p className="text-xs text-blue-600 mb-3">
-            Google Maps → desni klik na tačku → kopiraj prve dve vrednosti
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={lc}>Latitude (npr. 44.8125)</label>
-              <input type="number" step="any" value={form.lat} className={ic}
-                placeholder="44.8125"
-                onChange={e => setForm(f => ({ ...f, lat: e.target.value }))} />
-            </div>
-            <div>
-              <label className={lc}>Longitude (npr. 20.4612)</label>
-              <input type="number" step="any" value={form.lng} className={ic}
-                placeholder="20.4612"
-                onChange={e => setForm(f => ({ ...f, lng: e.target.value }))} />
-            </div>
-          </div>
-        </div>
-
-        {/* Opis */}
-        <div>
-          <label className={lc}>Opis lokacije (opciono)</label>
-          <textarea value={form.description} rows={4} className={ic}
-            placeholder="Opiši lokaciju — šta se tu može uloviti, posebnosti, pristup..."
-            onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
-        </div>
-
-        {/* Kontakt */}
-        <div>
-          <label className={lc}>Tvoj email ili telefon (opciono)</label>
-          <input type="text" value={form.contact} className={ic}
-            placeholder="Kako da te kontaktiramo ako trebamo više info"
-            onChange={e => setForm(f => ({ ...f, contact: e.target.value }))} />
-          <p className="text-xs text-gray-400 mt-1">Nećemo deliti tvoje podatke</p>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-            ❌ {error}
-          </div>
-        )}
-
-        <button type="submit" disabled={loading}
-          className="w-full bg-green-700 text-white py-3.5 rounded-xl font-semibold
-                     hover:bg-green-800 disabled:opacity-60 transition-colors text-base">
-          {loading ? '⏳ Šaljem...' : '📍 Pošalji Predlog'}
-        </button>
-
-        <p className="text-center text-xs text-gray-400">
-          Predlogom prihvataš naše uslove korišćenja. Lokacija će biti pregledana pre objave.
-        </p>
-      </form>
-    </main>
+      </div>
+    </div>
   )
 }
