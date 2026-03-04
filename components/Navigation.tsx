@@ -242,7 +242,13 @@ export default function Navigation() {
           <div style={{ borderTop: '1px solid #f0ede6', margin: '12px 0' }} />
           <Link href='/kalendar-aktivnosti' style={{ display: 'block', padding: '13px 12px', borderRadius: '12px',
             textDecoration: 'none', fontSize: '0.95rem', fontWeight: 600, color: '#0e1a0e' }}>📅 Kalendar</Link>
-          <Link href='/predlozi-lokaciju' style={{ display: 'block', padding: '13px 12px', borderRadius: '12px',
+          <a href='/dodaj-dogadjaj' style={{ display:'block', padding:'14px 16px',
+                borderRadius:'12px', color:'#0e1a0e', fontWeight:700,
+                textDecoration:'none', fontSize:'0.95rem', marginBottom:'4px',
+                background:'transparent' }}>
+                📅 Dodaj događaj
+              </a>
+              <Link href='/predlozi-lokaciju' style={{ display: 'block', padding: '13px 12px', borderRadius: '12px',
             textDecoration: 'none', fontSize: '0.95rem', fontWeight: 600, color: '#0e1a0e' }}>📍 + Dodaj lokaciju</Link>
           <div style={{ borderTop: '1px solid #f0ede6', margin: '12px 0' }} />
           <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#8fa68f',

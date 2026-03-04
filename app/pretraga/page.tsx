@@ -1,3 +1,4 @@
+import { getCardPhoto } from '@/lib/getCategoryPhoto'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
@@ -127,10 +128,13 @@ export default async function SearchPage({
                     boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
                     transition: 'transform 0.2s, box-shadow 0.2s' }}>
                     <div style={{ height: '190px', position: 'relative', background: col, overflow: 'hidden' }}>
-                      {loc.image_url ? (
-                        <img src={loc.image_url} alt={loc.name}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : (
+                      <img
+                        src={getCardPhoto(loc.slug, loc.image_url, cs)}
+                        alt={loc.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.opacity='0' }}
+                      />
+                      {false && (
                         <div style={{ width: '100%', height: '100%',
                           background: `linear-gradient(135deg,${col}dd 0%,${col}66 100%)`,
                           display: 'flex', alignItems: 'center',

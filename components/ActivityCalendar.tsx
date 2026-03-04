@@ -626,28 +626,55 @@ export default function ActivityCalendar({ locations, addEventLink }: { location
   return (
     <div style={{fontFamily:SANS,background:'#f9f7f2',minHeight:'100vh'}}>
 
-      {/* HEADER */}
-      <div style={{background:'linear-gradient(135deg,#1e3d1e 0%,#2d6a2d 100%)',padding:'80px 24px 36px'}}>
-        <div style={{maxWidth:'1200px',margin:'0 auto'}}>
-          <p style={{color:'#6ab87a',fontSize:'0.78rem',fontWeight:700,
-            textTransform:'uppercase',letterSpacing:'0.16em',marginBottom:'12px'}}>OutdoorBalkans</p>
-          <h1 style={{fontFamily:SERIF,fontSize:'clamp(2rem,4vw,3.2rem)',
-            fontWeight:900,color:'#fff',marginBottom:'10px'}}>Kalendar Aktivnosti</h1>
-          <p style={{color:'rgba(255,255,255,0.7)',fontSize:'1rem',maxWidth:'50ch',marginBottom:'22px'}}>
-            Sezone, takmičenja i outdoor eventi u Srbiji i regionu.
-          </p>
-          <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
-            {activeSeasons.map(([slug,s])=>(
-              <div key={slug} style={{display:'flex',alignItems:'center',gap:'6px',
-                background:'rgba(255,255,255,0.12)',backdropFilter:'blur(8px)',
-                border:'1px solid rgba(255,255,255,0.2)',padding:'5px 12px',borderRadius:'999px'}}>
-                <span>{s.icon}</span>
-                <span style={{color:'#fff',fontSize:'0.8rem',fontWeight:600}}>{s.label}</span>
-                <span style={{width:'6px',height:'6px',borderRadius:'50%',
-                  background:'#4ade80',boxShadow:'0 0 6px #4ade80'}}/>
+      {/* HERO */}
+      <div style={{position:'relative',height:'300px',overflow:'hidden'}}>
+        <img
+          src='https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?w=1920&h=600&fit=crop&q=80'
+          alt='Kalendar aktivnosti'
+          style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center 55%'}}
+        />
+        <div style={{position:'absolute',inset:0,
+          background:'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.72) 100%)'}}/>
+        <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'32px 28px'}}>
+          <div style={{maxWidth:'1200px',margin:'0 auto',
+            display:'flex',alignItems:'flex-end',justifyContent:'space-between',
+            flexWrap:'wrap',gap:'16px'}}>
+            <div>
+              <p style={{color:'rgba(255,255,255,0.7)',fontSize:'0.75rem',fontWeight:700,
+                textTransform:'uppercase',letterSpacing:'0.16em',marginBottom:'8px'}}>OutdoorBalkans</p>
+              <h1 style={{fontFamily:SERIF,fontSize:'clamp(1.8rem,4vw,3rem)',
+                fontWeight:900,color:'#fff',marginBottom:'8px',
+                textShadow:'0 2px 12px rgba(0,0,0,0.4)'}}>📅 Kalendar Aktivnosti</h1>
+              <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
+                {activeSeasons.map(([slug,s])=>(
+                  <div key={slug} style={{display:'flex',alignItems:'center',gap:'5px',
+                    background:'rgba(255,255,255,0.15)',backdropFilter:'blur(8px)',
+                    border:'1px solid rgba(255,255,255,0.25)',
+                    padding:'4px 10px',borderRadius:'999px'}}>
+                    <span style={{fontSize:'0.8rem'}}>{s.icon}</span>
+                    <span style={{color:'#fff',fontSize:'0.75rem',fontWeight:600}}>{s.label}</span>
+                    <span style={{width:'5px',height:'5px',borderRadius:'50%',
+                      background:'#4ade80',boxShadow:'0 0 5px #4ade80'}}/>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <a href='/dodaj-dogadjaj'
+              style={{background:'rgba(255,255,255,0.18)',color:'#fff',
+                padding:'12px 24px',borderRadius:'14px',textDecoration:'none',
+                fontWeight:700,fontSize:'0.9rem',
+                border:'1px solid rgba(255,255,255,0.35)',backdropFilter:'blur(8px)',
+                whiteSpace:'nowrap',display:'inline-flex',alignItems:'center',gap:'8px',
+                flexShrink:0}}>
+              📅 + Prijavi događaj
+            </a>
           </div>
+        </div>
+        <div style={{position:'absolute',bottom:-1,left:0,right:0}}>
+          <svg viewBox='0 0 1440 30' preserveAspectRatio='none'
+            style={{display:'block',width:'100%',height:'30px'}}>
+            <path d='M0 30 C360 5 1080 25 1440 10 L1440 30 Z' fill='#f9f7f2'/>
+          </svg>
         </div>
       </div>
 
