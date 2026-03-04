@@ -42,6 +42,9 @@ export default function Navigation() {
   const router   = useRouter()
   const pathname = usePathname()
   const isHome   = pathname === '/'
+  const hasHero  = ['/', '/kalendar-aktivnosti', '/dodaj', '/dodaj-dogadjaj',
+                    '/predlozi-lokaciju', '/pretraga'].includes(pathname) ||
+                   pathname.startsWith('/srbija/') || pathname.match(/\/[a-z-]+\/[a-z-]+\/[a-z-]+/) !== null
 
   useEffect(() => { try { setLang(localStorage.getItem('ob_lang') ?? 'SR') } catch {} }, [])
   useEffect(() => {
@@ -72,7 +75,7 @@ export default function Navigation() {
   const isAdmin     = user && ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')
   const userName    = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? ''
   const userInitial = userName.charAt(0).toUpperCase()
-  const transparent = isHome && !scrolled && !mobOpen
+  const transparent = hasHero && !scrolled && !mobOpen
   const textCol     = transparent ? '#fff' : '#0e1a0e'
   const DD: React.CSSProperties = {
     position: 'absolute', top: 'calc(100% + 6px)', right: 0,
@@ -130,8 +133,69 @@ export default function Navigation() {
 
           <Link href='/kalendar-aktivnosti' style={{ color: textCol, fontSize: '0.9rem', fontWeight: 600,
             textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap' }}>Kalendar</Link>
-          <Link href='/predlozi-lokaciju' style={{ color: textCol, fontSize: '0.9rem', fontWeight: 600,
-            textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap' }}>+ Dodaj</Link>
+          <div style={{ position: 'relative' }} onMouseEnter={addDrop.enter} onMouseLeave={addDrop.leave}>
+            <button style={{ background: transparent ? 'rgba(255,255,255,0.18)' : '#2d6a2d',
+              color: '#fff', border: transparent ? '1px solid rgba(255,255,255,0.35)' : 'none',
+              backdropFilter: transparent ? 'blur(8px)' : 'none',
+              padding: '8px 16px', borderRadius: '999px', fontWeight: 700,
+              fontSize: '0.85rem', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '6px',
+              fontFamily: "'DM Sans',system-ui,sans-serif", whiteSpace: 'nowrap',
+              transition: 'background 0.3s' }}>
+              + Dodaj
+              <svg width='11' height='11' viewBox='0 0 24 24' fill='none'
+                stroke='currentColor' strokeWidth='2.5'><path d='M6 9l6 6 6-6'/></svg>
+            </button>
+            {addDrop.open && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                background: '#fff', borderRadius: '16px', padding: '8px',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.15)',
+                border: '1px solid rgba(0,0,0,0.07)', zIndex: 200, minWidth: '230px' }}
+                onMouseEnter={addDrop.enter} onMouseLeave={addDrop.leave}>
+                <a href='/predlozi-lokaciju'
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '11px 14px', borderRadius: '12px', textDecoration: 'none',
+                    color: '#0e1a0e', marginBottom: '2px', transition: 'background 0.15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#f9f7f2')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                  <span style={{ fontSize: '1.6rem' }}>📍</span>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: '0.88rem', color: '#0e1a0e' }}>
+                      Predloži lokaciju
+                    </p>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#8fa68f' }}>
+                      Ribolov, lov, planinarenje...
+                    </p>
+                  </div>
+                </a>
+                <a href='/dodaj-dogadjaj'
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '11px 14px', borderRadius: '12px', textDecoration: 'none',
+                    color: '#0e1a0e', transition: 'background 0.15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#f9f7f2')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                  <span style={{ fontSize: '1.6rem' }}>📅</span>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: '0.88rem', color: '#0e1a0e' }}>
+                      Prijavi događaj
+                    </p>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#8fa68f' }}>
+                      Takmičenje, festival, izlazak
+                    </p>
+                  </div>
+                </a>
+                <div style={{ borderTop: '1px solid #f0ede6', margin: '6px 0' }} />
+                <a href='/dodaj'
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px',
+                    padding: '9px 14px', borderRadius: '12px', textDecoration: 'none',
+                    color: '#8fa68f', fontSize: '0.8rem', fontWeight: 600 }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#f9f7f2')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                  Sve opcije →
+                </a>
+              </div>
+            )}
+          </div>
 
           <div style={{ position: 'relative' }} onMouseEnter={langDrop.enter} onMouseLeave={langDrop.leave}>
             <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: textCol,
