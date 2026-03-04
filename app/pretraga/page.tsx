@@ -1,4 +1,5 @@
 import { getCardPhoto } from '@/lib/getCategoryPhoto'
+import SaveButton from '@/components/SaveButton'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
@@ -133,6 +134,9 @@ export default async function SearchPage({
                         alt={loc.name}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
+                      <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+                        <SaveButton itemType='location' itemId={loc.id} size='sm' />
+                      </div>
                       {false && (
                         <div style={{ width: '100%', height: '100%',
                           background: `linear-gradient(135deg,${col}dd 0%,${col}66 100%)`,

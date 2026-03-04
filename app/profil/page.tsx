@@ -78,9 +78,9 @@ export default function ProfilPage() {
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', marginBottom:'24px' }}>
           {[
             { href:'/moje-lokacije', icon:'📍', label:'Moje lokacije' },
+            { href:'/sacuvano', icon:'❤️', label:'Sačuvano' },
             { href:'/predlozi-lokaciju', icon:'➕', label:'Dodaj lokaciju' },
             { href:'/dodaj-dogadjaj', icon:'📅', label:'Dodaj događaj' },
-            { href:'/kalendar-aktivnosti', icon:'🗓️', label:'Kalendar' },
           ].map(item => (
             <Link key={item.href} href={item.href}
               style={{ background:'#fff', borderRadius:'16px', padding:'18px',
