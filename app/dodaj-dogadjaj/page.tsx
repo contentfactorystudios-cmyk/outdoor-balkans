@@ -111,7 +111,7 @@ export default function DodajDogadjaj() {
           <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(1.8rem,4vw,2.8rem)',
             fontWeight: 900, color: '#fff', marginBottom: '12px',
             textShadow: '0 2px 16px rgba(0,0,0,0.2)' }}>
-            Prijavi Događaj
+            Predloži Događaj
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.88)', fontSize: '1rem',
             maxWidth: '460px', margin: '0 auto', lineHeight: 1.7 }}>
