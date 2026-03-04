@@ -132,7 +132,6 @@ export default async function SearchPage({
                         src={getCardPhoto(loc.slug, loc.image_url, cs)}
                         alt={loc.name}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => { (e.target as HTMLImageElement).style.opacity='0' }}
                       />
                       {false && (
                         <div style={{ width: '100%', height: '100%',
