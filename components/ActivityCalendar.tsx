@@ -145,7 +145,7 @@ function getWeatherRec(code: number, temp: number, filterCat: string[]) {
   return { icon:'🌿', text:'Odlični uslovi za outdoor!', col:'#4ade80' }
 }
 
-export default function ActivityCalendar({ locations }: { locations: any[] }) {
+export default function ActivityCalendar({ locations, addEventLink }: { locations: any[], addEventLink?: string }) {
   const now   = new Date()
   const [year,  setYear]   = useState(now.getFullYear())
   const [month, setMonth]  = useState(now.getMonth())
