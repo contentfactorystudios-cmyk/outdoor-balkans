@@ -50,7 +50,7 @@ export default async function HomePage() {
           <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(2.4rem,6vw,5rem)', fontWeight: 900,
             color: '#fff', lineHeight: 1.1, marginBottom: '28px',
             textShadow: '0 2px 24px rgba(0,0,0,0.5)', maxWidth: '13ch' }}>
-            Pronađi svoju prirodu.
+            Tvoja sledeća avantura počinje ovde.
           </h1>
           <form action='/pretraga' method='GET' style={{ width: '100%', maxWidth: '560px', marginBottom: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', background: '#fff',
@@ -84,7 +84,7 @@ export default async function HomePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(1.5rem,3vw,2rem)', fontWeight: 700,
             color: '#0e1a0e', marginBottom: '36px', textAlign: 'center' }}>
-            Istraži po aktivnosti
+            Izaberi svoj teren
           </h2>
           <div className='cat-scroll' style={{ display: 'flex', overflowX: 'auto', gap: '24px', paddingBottom: '8px',
             scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
@@ -160,7 +160,7 @@ export default async function HomePage() {
             </p>
             <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(1.4rem,2.5vw,1.9rem)',
               fontWeight: 700, color: '#0e1a0e', marginBottom: '10px' }}>
-              Najnovije lokacije
+              Sveže sa staze
             </h2>
             <Link href='/pretraga' style={{ fontSize: '0.88rem', fontWeight: 600, color: '#2d6a2d',
               textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -221,7 +221,7 @@ export default async function HomePage() {
             textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '16px' }}>Zajednica</p>
           <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(2rem,4vw,3rem)', fontWeight: 900,
             color: '#fff', lineHeight: 1.15, marginBottom: '20px',
-            textShadow: '0 2px 16px rgba(0,0,0,0.3)' }}>Share your next adventure</h2>
+            textShadow: '0 2px 16px rgba(0,0,0,0.3)' }}>Tvoja reč menja mapu</h2>
           <p style={{ color: 'rgba(255,255,255,0.82)', fontSize: '1rem', lineHeight: 1.7,
             marginBottom: '32px', maxWidth: '42ch', margin: '0 auto 32px' }}>
             Znaš tajno ribolovno mesto, planinarsku stazu ili divlji kamp? Podeli ga sa zajednicom.
@@ -264,7 +264,7 @@ export default async function HomePage() {
       {/* GEAR UP */}
       <GearCarousel />
 
-      {/* TOP LOKACIJE — Adventure anywhere stil */}
+      {/* TOP LOKACIJE — Balkanski vrhovi i virovi stil */}
       <section style={{ background: '#f9f7f2', padding: '72px 24px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '52px' }}>
@@ -274,7 +274,7 @@ export default async function HomePage() {
             </p>
             <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(1.8rem,3vw,2.4rem)',
               fontWeight: 900, color: '#0e1a0e' }}>
-              Adventure anywhere
+              Balkanski vrhovi i virovi
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: '40px' }}>

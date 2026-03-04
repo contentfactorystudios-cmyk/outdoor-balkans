@@ -247,7 +247,15 @@ export default function Navigation() {
                   <Link href='/profil' onClick={() => userDrop.setOpen(false)}
                     style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
                       borderRadius: '8px', textDecoration: 'none', fontSize: '0.88rem', color: '#0e1a0e' }}>👤 Moj profil</Link>
-                  <Link href='/moje-lokacije' onClick={() => userDrop.setOpen(false)}
+                  <Link href='/sacuvano' onClick={() => userDrop.setOpen(false)}
+                style={{ display:'flex', alignItems:'center', gap:'10px',
+                  padding:'10px 14px', borderRadius:'10px', textDecoration:'none', color:'#0e1a0e',
+                  fontSize:'0.88rem', fontWeight:600 }}
+                onMouseEnter={e=>(e.currentTarget.style.background='#f9f7f2')}
+                onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
+                ❤️ Sačuvano
+              </Link>
+              <Link href='/moje-lokacije' onClick={() => userDrop.setOpen(false)}
                     style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
                       borderRadius: '8px', textDecoration: 'none', fontSize: '0.88rem', color: '#0e1a0e' }}>📍 Moje lokacije</Link>
                   <div style={{ borderTop: '1px solid #f0ede6', margin: '4px 0' }} />

@@ -18,7 +18,7 @@ export default function DodajPage() {
           alt='' style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 60%' }} />
         <div style={{ position:'absolute', inset:0,
           background:'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%)' }} />
-        <div style={{ position:'absolute', bottom:'32px', left:'28px', right:'28px',
+        <div style={{ position:'absolute', bottom:'32px', left:0, right:0, padding:'0 28px',
           maxWidth:'700px', margin:'0 auto' }}>
           <h1 style={{ fontFamily:SERIF, fontSize:'clamp(1.8rem,4vw,2.8rem)',
             fontWeight:900, color:'#fff', textShadow:'0 2px 12px rgba(0,0,0,0.4)',
@@ -26,7 +26,7 @@ export default function DodajPage() {
             Šta želiš da dodaš?
           </h1>
           <p style={{ color:'rgba(255,255,255,0.85)', fontSize:'1rem' }}>
-            Pridruži se OutdoorBalkans zajednici — podeli lokaciju ili organizuj event.
+            Tvoja reč menja mapu — podeli lokaciju ili predloži event.
           </p>
         </div>
         <div style={{ position:'absolute', bottom:-1, left:0, right:0 }}>
@@ -44,16 +44,7 @@ export default function DodajPage() {
           <Link href='/predlozi-lokaciju' style={{ textDecoration:'none' }}>
             <div style={{ background:'#fff', borderRadius:'24px', padding:'36px 28px',
               border:'2px solid #e8e2d4', textAlign:'center',
-              boxShadow:'0 4px 24px rgba(0,0,0,0.06)',
-              transition:'all 0.2s' }}
-              onMouseEnter={e=>{
-                (e.currentTarget as HTMLElement).style.borderColor='#2d6a2d'
-                ;(e.currentTarget as HTMLElement).style.transform='translateY(-4px)'
-              }}
-              onMouseLeave={e=>{
-                (e.currentTarget as HTMLElement).style.borderColor='#e8e2d4'
-                ;(e.currentTarget as HTMLElement).style.transform='none'
-              }}>
+              boxShadow:'0 4px 24px rgba(0,0,0,0.06)' }}>
               <div style={{ fontSize:'3.5rem', marginBottom:'16px' }}>📍</div>
               <h2 style={{ fontFamily:SERIF, fontSize:'1.3rem', fontWeight:800,
                 color:'#0e1a0e', marginBottom:'10px' }}>Predloži lokaciju</h2>
@@ -65,7 +56,7 @@ export default function DodajPage() {
                 marginBottom:'24px' }}>
                 {['🎣','🦌','🚣','⛺','🥾','🦋'].map(ic => (
                   <span key={ic} style={{ fontSize:'1.2rem', width:'36px', height:'36px',
-                    background:'#f9f7f2', borderRadius:'10px', display:'flex',
+                    background:'#f9f7f2', borderRadius:'10px', display:'inline-flex',
                     alignItems:'center', justifyContent:'center' }}>{ic}</span>
                 ))}
               </div>
@@ -80,16 +71,7 @@ export default function DodajPage() {
           <Link href='/dodaj-dogadjaj' style={{ textDecoration:'none' }}>
             <div style={{ background:'#fff', borderRadius:'24px', padding:'36px 28px',
               border:'2px solid #e8e2d4', textAlign:'center',
-              boxShadow:'0 4px 24px rgba(0,0,0,0.06)',
-              transition:'all 0.2s' }}
-              onMouseEnter={e=>{
-                (e.currentTarget as HTMLElement).style.borderColor='#1d5fa8'
-                ;(e.currentTarget as HTMLElement).style.transform='translateY(-4px)'
-              }}
-              onMouseLeave={e=>{
-                (e.currentTarget as HTMLElement).style.borderColor='#e8e2d4'
-                ;(e.currentTarget as HTMLElement).style.transform='none'
-              }}>
+              boxShadow:'0 4px 24px rgba(0,0,0,0.06)' }}>
               <div style={{ fontSize:'3.5rem', marginBottom:'16px' }}>📅</div>
               <h2 style={{ fontFamily:SERIF, fontSize:'1.3rem', fontWeight:800,
                 color:'#0e1a0e', marginBottom:'10px' }}>Predloži događaj</h2>
@@ -101,7 +83,7 @@ export default function DodajPage() {
                 marginBottom:'24px' }}>
                 {['🏆','🎯','🏕️','🌄','🤝','🎉'].map(ic => (
                   <span key={ic} style={{ fontSize:'1.2rem', width:'36px', height:'36px',
-                    background:'#f9f7f2', borderRadius:'10px', display:'flex',
+                    background:'#f9f7f2', borderRadius:'10px', display:'inline-flex',
                     alignItems:'center', justifyContent:'center' }}>{ic}</span>
                 ))}
               </div>
@@ -122,8 +104,7 @@ export default function DodajPage() {
             <p style={{ fontWeight:700, color:'#0e1a0e', marginBottom:'6px' }}>Kako funkcioniše?</p>
             <p style={{ color:'#8fa68f', fontSize:'0.88rem', lineHeight:1.7 }}>
               Svaki predlog prolazi kroz <strong style={{ color:'#0e1a0e' }}>admin pregled</strong> pre objavljivanja.
-              Lokacije se dodaju u bazu i pojavljuju na sajtu, događaji na kalendaru.
-              Obično odobravamo u roku od 24–48 sati.
+              Lokacije se dodaju na mapu, događaji na kalendar. Odobravamo u roku od 24–48h.
             </p>
           </div>
         </div>
