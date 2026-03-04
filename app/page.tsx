@@ -47,7 +47,7 @@ export default async function HomePage() {
         <HeroSlider catData={CAT} />
         <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', padding: '0 24px 70px' }}>
-          <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(2.4rem,6vw,5rem)', fontWeight: 900,
+          <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(1.8rem,4vw,3.4rem)', fontWeight: 900,
             color: '#fff', lineHeight: 1.1, marginBottom: '28px',
             textShadow: '0 2px 24px rgba(0,0,0,0.5)', maxWidth: '13ch' }}>
             Tvoja sledeća avantura počinje ovde.

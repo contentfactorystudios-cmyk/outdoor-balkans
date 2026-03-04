@@ -37,11 +37,11 @@ export default function LocationsNearby({ catData }: Props) {
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <p style={{ color: '#8fa68f', fontSize: '0.78rem', fontWeight: 700,
             textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '10px' }}>
-            Preporučeno u tvojoj blizini
+            Divljina na dohvat ruke
           </p>
           <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(1.4rem,2.5vw,1.9rem)',
             fontWeight: 700, color: '#0e1a0e', marginBottom: '8px' }}>
-            {loading ? 'Učitavam lokacije...' : `Preporučeno u blizini — ${city}`}
+            {loading ? 'Učitavam lokacije...' : `Divljina na dohvat ruke — ${city}`}
           </h2>
           <Link href='/pretraga' style={{ fontSize: '0.88rem', fontWeight: 600,
             color: '#2d6a2d', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>

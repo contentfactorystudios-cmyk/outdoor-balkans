@@ -61,7 +61,7 @@ export default function GearCarousel() {
           letterSpacing: '0.14em', marginBottom: '10px', textAlign: 'center' }}>Outdoor Shop</p>
         <h2 style={{ fontFamily: "'Fraunces','Playfair Display',Georgia,serif",
           fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontWeight: 900, color: '#0e1a0e', textAlign: 'center',
-          marginBottom: '8px' }}>Gear up for the adventure</h2>
+          marginBottom: '8px' }}>Oprema koja te ne ostavlja na cedilu</h2>
         <p style={{ color: '#8fa68f', fontSize: '0.95rem', textAlign: 'center' }}>
           Pomeri levo/desno da vidiš preporučenu opremu po kategoriji
         </p>
