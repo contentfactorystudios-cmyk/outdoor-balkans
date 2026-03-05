@@ -149,10 +149,7 @@ export default async function LocationPage({ params }: Props) {
             background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)',
             color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 500,
             padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)' }}>
-            {photoResult.source === 'wikipedia' ? '📷 Wikipedia' :
-             photoResult.source === 'commons'   ? '📷 Wikimedia Commons' :
-             photoResult.source === 'mapbox'    ? '🛰️ Satelitski snimak' :
-             '📷 Kategorija'}
+            {'📷 Foto'}
           </div>
         )}
         {/* Wave */}
@@ -177,7 +174,7 @@ export default async function LocationPage({ params }: Props) {
               padding: '20px 0', borderBottom: '1px solid #f0ede6', marginBottom: '32px',
               flexWrap: 'wrap', gap: '12px' }}>
               <ReactionsBar locationId={location.id} />
-              <ShareButtons title={location.name} />
+              <ShareButtons title={location.name} url={typeof window !== 'undefined' ? window.location.href : ''} />
             </div>
 
             {/* Opis */}
@@ -267,7 +264,7 @@ export default async function LocationPage({ params }: Props) {
                   color: '#0e1a0e', marginBottom: '16px' }}>
                   🌤️ Vremenska prognoza
                 </h2>
-                <WeatherWidget lat={lat} lng={lng} category={category} />
+                <WeatherWidget lat={lat} lng={lng} category={category} locationName={location.name} />
               </div>
             )}
 

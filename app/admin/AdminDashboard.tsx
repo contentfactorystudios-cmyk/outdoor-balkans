@@ -254,7 +254,7 @@ const EMPTY = {
 export default function AdminDashboard({ user, countries, categories, regions, locations }: Props) {
   const router = useRouter()
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       if (!session) window.location.href = '/admin/login'
     })
   }, [])

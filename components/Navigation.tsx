@@ -24,7 +24,7 @@ const EXPLORE = [
 
 function useDropdown() {
   const [open, setOpen] = useState(false)
-  const timer = useRef<ReturnType<typeof setTimeout>>()
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const enter = useCallback(() => { clearTimeout(timer.current); setOpen(true) }, [])
   const leave = useCallback(() => { timer.current = setTimeout(() => setOpen(false), 220) }, [])
   return { open, enter, leave, setOpen }

@@ -13,7 +13,7 @@ export default function MojeLokacijePage() {
   const router = useRouter()
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
+    supabase.auth.getUser().then(async ({ data }: { data: any }) => {
       if (!data.user) { router.push('/login'); return }
       const { data: locs } = await supabase
         .from('locations')

@@ -21,7 +21,7 @@ const SLIDES = [
 export default function HeroSlider({ catData }: { catData?: Record<string, CatData> }) {
   const [current, setCurrent] = useState(0)
   const [next,    setNext]    = useState<number | null>(null)
-  const timerRef = useRef<ReturnType<typeof setInterval>>()
+  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined)
 
   useEffect(() => {
     SLIDES.forEach(s => { const img = new Image(); img.src = catData?.[s.slug]?.hero ?? s.hero })

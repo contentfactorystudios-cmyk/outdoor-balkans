@@ -17,8 +17,8 @@ export default async function PredloziPage() {
     .order('vote_count', { ascending: false })
     .limit(50)
 
-  const pending  = proposals?.filter(p => p.status === 'pending')  ?? []
-  const approved = proposals?.filter(p => p.status === 'approved') ?? []
+  const pending  = proposals?.filter((p: any) => p.status === 'pending')  ?? []
+  const approved = proposals?.filter((p: any) => p.status === 'approved') ?? []
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
