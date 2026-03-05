@@ -57,7 +57,7 @@ export default async function HomePage() {
             textShadow: '0 2px 24px rgba(0,0,0,0.5)', maxWidth: '13ch' }}>
             Kroči u divljinu..
           </h1>
-          <form action='/pretraga' method='GET' className='hero-search' style={{ width: '100%', maxWidth: '440px', marginBottom: '12px' }}>
+          <form action='/pretraga' method='GET' className='hero-search-wrap' className='hero-search' style={{ width: '100%', maxWidth: '440px', marginBottom: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', background: '#fff',
               borderRadius: '999px', padding: '6px 6px 6px 22px',
               boxShadow: '0 8px 40px rgba(0,0,0,0.35)', gap: '8px' }}>
@@ -93,8 +93,18 @@ export default async function HomePage() {
             }
           }
         `}</style>
+
+        <style>{`
+          @media (max-width: 640px) {
+            .hero-search-wrap { max-width: calc(100vw - 40px) !important; }
+            .hero-search-inner { padding: 5px 5px 5px 16px !important; }
+            .hero-search-btn { padding: 9px 16px !important; font-size: 0.82rem !important; }
+            .hero-search-input { font-size: 0.88rem !important; }
+            .hero-content { padding-left: 20px !important; padding-right: 20px !important; }
+          }
+        `}</style>
         <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0, zIndex: 15 }}>
-          <svg viewBox='0 0 1440 80' preserveAspectRatio='none' style={{ display: 'block', width: '100%', height: '80px' }}>
+          <svg viewBox='0 0 1440 80' preserveAspectRatio='none' style={{ display: 'block', width: '100%', height: '40px' }}>
             <path d='M0 80 C360 20 720 60 1080 30 C1260 15 1380 50 1440 40 L1440 80 Z' fill='#fff'/>
           </svg>
         </div>
