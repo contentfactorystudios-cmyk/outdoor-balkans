@@ -45,7 +45,7 @@ export default async function HomePage() {
       {/* HERO */}
       <section style={{ position: 'relative', height: '75vh', minHeight: '520px', overflow: 'hidden' }}>
         <HeroSlider catData={CAT} />
-        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column',
+        <div className='hero-content' style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column',
           alignItems: 'flex-start', justifyContent: 'center', height: '100%', textAlign: 'left', padding: '0 24px 70px' }}>
                     <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.72rem', fontWeight: 700,
             textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '14px',
@@ -57,7 +57,7 @@ export default async function HomePage() {
             textShadow: '0 2px 24px rgba(0,0,0,0.5)', maxWidth: '13ch' }}>
             Kroči u divljinu..
           </h1>
-          <form action='/pretraga' method='GET' style={{ width: '100%', maxWidth: '560px', marginBottom: '12px' }}>
+          <form action='/pretraga' method='GET' className='hero-search' style={{ width: '100%', maxWidth: '440px', marginBottom: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', background: '#fff',
               borderRadius: '999px', padding: '6px 6px 6px 22px',
               boxShadow: '0 8px 40px rgba(0,0,0,0.35)', gap: '8px' }}>
@@ -66,9 +66,9 @@ export default async function HomePage() {
               </svg>
               <input name='q' type='search' placeholder='Pretraži reke, planine, lovišta...'
                 style={{ flex: 1, border: 'none', outline: 'none', fontSize: '1rem',
-                  color: '#0e1a0e', background: 'transparent', padding: '10px 0', fontFamily: 'inherit' }} />
+                  color: '#0e1a0e', background: 'transparent', padding: '8px 0', fontFamily: 'inherit' }} />
               <button type='submit' style={{ background: '#2d6a2d', color: '#fff', border: 'none',
-                borderRadius: '999px', padding: '12px 28px', fontSize: '0.95rem',
+                borderRadius: '999px', padding: '10px 20px', fontSize: '0.88rem',
                 fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>Pretraži</button>
             </div>
           </form>
@@ -77,6 +77,22 @@ export default async function HomePage() {
             Napredno pretraživanje →
           </Link>
         </div>
+
+        <style>{`
+          @media (max-width: 640px) {
+            .hero-content {
+              padding-left: 20px !important;
+              padding-right: 20px !important;
+              max-width: 100% !important;
+            }
+            .hero-content h1 {
+              font-size: 1.9rem !important;
+            }
+            .hero-search {
+              max-width: 100% !important;
+            }
+          }
+        `}</style>
         <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0, zIndex: 15 }}>
           <svg viewBox='0 0 1440 80' preserveAspectRatio='none' style={{ display: 'block', width: '100%', height: '80px' }}>
             <path d='M0 80 C360 20 720 60 1080 30 C1260 15 1380 50 1440 40 L1440 80 Z' fill='#fff'/>

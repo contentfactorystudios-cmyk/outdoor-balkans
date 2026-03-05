@@ -726,6 +726,8 @@ export default function ActivityCalendar({ locations, addEventLink }: { location
                 <CalGrid/>
                 <SelDayPanel/>
               </div>
+              <UpcomingPanel/>
+              <LocsPanel/>
               <SeasonBar/>
               <WeatherPanel/>
             </div>
