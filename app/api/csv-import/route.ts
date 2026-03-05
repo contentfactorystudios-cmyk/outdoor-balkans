@@ -25,9 +25,7 @@ export async function POST(request: NextRequest) {
         results.errors.push(`Nedostaju podaci: ${JSON.stringify(loc)}`)
         continue
       }
-
       const slug = nameToSlug(loc.name)
-
       const { error } = await supabase.from('locations').upsert({
         name: loc.name,
         slug,
