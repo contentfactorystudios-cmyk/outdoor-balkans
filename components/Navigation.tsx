@@ -43,7 +43,7 @@ export default function Navigation() {
   const pathname = usePathname()
   const isHome   = pathname === '/'
   const hasHero  = ['/', '/kalendar-aktivnosti', '/dodaj', '/dodaj-dogadjaj',
-                    '/predlozi-lokaciju', '/pretraga'].includes(pathname) ||
+                    '/pretraga'].includes(pathname) ||
                    pathname.startsWith('/srbija/') || pathname.match(/\/[a-z-]+\/[a-z-]+\/[a-z-]+/) !== null
 
   useEffect(() => { try { setLang(localStorage.getItem('ob_lang') ?? 'SR') } catch {} }, [])

@@ -22,15 +22,15 @@ export async function proxy(req: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (!user) {
     return NextResponse.redirect(new URL('/admin/login', req.url))
   }
 
-  const email = session.user.email?.toLowerCase() ?? ''
+  const email = user.email?.toLowerCase() ?? ''
   if (!ADMIN_EMAILS.includes(email)) {
-    return NextResponse.redirect(new URL('/', req.url))
+    return NextResponse.redirect(new URL('/pristup-zabranjen', req.url))
   }
 
   return res
