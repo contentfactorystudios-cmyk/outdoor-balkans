@@ -43,6 +43,7 @@ function ProposalCard({ prop, categories, countries, regions, onApprove, onRejec
           ai_description: d.description || '',
           ai_best_season: d.best_season || '',
           ai_permit_required: d.permit_required ?? false,
+          ai_category_data: d.category_data ?? {},
           ai_meta_title: d.meta_title || '',
           ai_quality_score: 85,
         }))
@@ -246,7 +247,7 @@ function parseCSV(text: string): Record<string, string>[] {
 const EMPTY = {
   name: '', slug: '', short_description: '', description: '',
   country_id: '', region_id: '', category_id: '', lat: '', lng: '',
-  meta_title: '', meta_description: '', best_season: '',
+  meta_title: '', meta_description: '', best_season: '', category_data: {} as Record<string, any>,
   permit_required: false, permit_info: '', access_notes: '', is_published: true,
 }
 
@@ -300,6 +301,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
         best_season: d.best_season ?? f.best_season,
         permit_required: d.permit_required ?? f.permit_required,
         permit_info: d.permit_info ?? f.permit_info,
+        category_data: d.category_data ?? f.category_data,
       }))
       setAiMsg('✅ AI popunio polja! Proveri i izmeni po potrebi.')
     } catch (err: any) {
@@ -318,6 +320,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
       p_meta_title: form.meta_title || `${form.name} | OutdoorBalkans`,
       p_meta_description: form.meta_description || form.short_description,
       p_best_season: form.best_season || null, p_permit_required: form.permit_required,
+      p_category_data: form.category_data || {},
       p_permit_info: form.permit_info || null, p_access_notes: form.access_notes || null, p_is_published: form.is_published,
     })
     if (error) { setMsg(`❌ Greška: ${error.message}`) }
@@ -399,6 +402,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
       best_season: prop.ai_best_season || '',
       permit_required: prop.ai_permit_required ?? false,
       image_url: prop.photo_urls?.[0] ?? null,
+      category_data: prop.ai_category_data ?? {},
     })
     if (error) { setProposalMsg('❌ Greška: ' + error.message); return }
     await supabase.from('location_proposals')

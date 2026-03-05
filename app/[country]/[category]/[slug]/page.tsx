@@ -7,6 +7,7 @@ import WeatherWidget   from '@/components/WeatherWidget'
 import CommentsSection from '@/components/CommentsSection'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
+import CategoryDetails from '@/components/CategoryDetails'
 import type { Metadata } from 'next'
 
 export const revalidate = 86400
@@ -195,6 +196,14 @@ export default async function LocationPage({ params }: Props) {
                   {location.short_description}
                 </p>
               </div>
+            )}
+
+            {/* Category-specific podaci */}
+            {location.category_data && Object.keys(location.category_data).length > 0 && (
+              <CategoryDetails
+                category={category}
+                data={location.category_data}
+              />
             )}
 
             {/* Praktične informacije */}
