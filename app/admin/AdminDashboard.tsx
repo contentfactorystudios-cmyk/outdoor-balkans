@@ -5,6 +5,223 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
+// ─── ProposalCard — MORA biti prije AdminDashboard ───────────────
+function ProposalCard({ prop, categories, countries, regions, onApprove, onReject }: any) {
+  const [adminNote, setAdminNote] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiDone, setAiDone] = useState(!!prop.ai_short_description)
+  const [editedProp, setEditedProp] = useState({ ...prop })
+  const [editMode, setEditMode] = useState(false)
+
+  const sc: Record<string,{bg:string,text:string}> = {
+    pending:  { bg:'#fef3c7', text:'#92400e' },
+    approved: { bg:'#d1fae5', text:'#065f46' },
+    rejected: { bg:'#fee2e2', text:'#991b1b' },
+  }
+  const s = sc[prop.status] ?? sc.pending
+  const isPending = prop.status === 'pending'
+
+  async function runAI() {
+    setAiLoading(true)
+    try {
+      const res = await fetch('/api/ai-generate', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          name: editedProp.geo_name || editedProp.name,
+          category: editedProp.category_slug || editedProp.category,
+          country: editedProp.geo_country || editedProp.country || 'Srbija',
+          region: editedProp.geo_region || editedProp.region || '',
+        })
+      })
+      const json = await res.json()
+      if (json.data) {
+        const d = json.data
+        setEditedProp((prev: any) => ({
+          ...prev,
+          ai_name: d.name || prev.geo_name || prev.name,
+          ai_short_description: d.short_description || '',
+          ai_description: d.description || '',
+          ai_best_season: d.best_season || '',
+          ai_permit_required: d.permit_required ?? false,
+          ai_meta_title: d.meta_title || '',
+          ai_quality_score: 85,
+        }))
+        setAiDone(true)
+      }
+    } catch {}
+    setAiLoading(false)
+  }
+
+  function setField(field: string) {
+    return (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) =>
+      setEditedProp((prev: any) => ({ ...prev, [field]: e.target.value }))
+  }
+
+  return (
+    <div style={{ background:'#fff', borderRadius:'16px', border:'1px solid #e5e7eb',
+      overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.05)' }}>
+      {/* Header */}
+      <div style={{ background:'linear-gradient(135deg,#1e3d1e,#2d6a2d)',
+        padding:'14px 20px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div>
+          <p style={{ color:'rgba(255,255,255,0.65)', fontSize:'0.68rem', fontWeight:700,
+            textTransform:'uppercase', marginBottom:'2px' }}>
+            📍 {prop.email || 'Anonimno'} · {new Date(prop.created_at).toLocaleDateString('sr-RS')}
+          </p>
+          <p style={{ color:'#fff', fontWeight:800, fontSize:'0.95rem' }}>
+            {editedProp.geo_name || editedProp.name || 'Nova lokacija'}
+          </p>
+        </div>
+        <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+          <span style={{ background:s.bg, color:s.text, fontSize:'0.72rem',
+            fontWeight:700, padding:'3px 10px', borderRadius:'999px' }}>{prop.status}</span>
+          {isPending && (
+            <button onClick={() => setEditMode(!editMode)}
+              style={{ background:'rgba(255,255,255,0.18)', border:'1px solid rgba(255,255,255,0.35)',
+                color:'#fff', borderRadius:'8px', padding:'5px 12px',
+                cursor:'pointer', fontSize:'0.75rem', fontWeight:700 }}>
+              {editMode ? '✓ Zatvori' : '✏️ Uredi'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={{ padding:'18px 20px' }}>
+        {/* Slike */}
+        {editedProp.photo_urls?.length > 0 && (
+          <div style={{ display:'flex', gap:'8px', marginBottom:'14px' }}>
+            {editedProp.photo_urls.map((url: string, i: number) => (
+              <img key={i} src={url} alt=""
+                style={{ width:'90px', height:'70px', objectFit:'cover',
+                  borderRadius:'10px', border:'1px solid #e5e7eb' }} />
+            ))}
+          </div>
+        )}
+
+        {/* Info grid */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'8px', marginBottom:'14px' }}>
+          {[
+            { l:'Kategorija', v: editedProp.category || editedProp.category_slug },
+            { l:'Region', v: editedProp.geo_region || editedProp.region },
+            { l:'GPS', v: editedProp.lat ? `${Number(editedProp.lat).toFixed(4)}, ${Number(editedProp.lng).toFixed(4)}` : '—' },
+          ].map(f => (
+            <div key={f.l} style={{ background:'#f9fafb', borderRadius:'8px', padding:'8px 12px' }}>
+              <p style={{ fontSize:'0.62rem', fontWeight:700, color:'#9ca3af',
+                textTransform:'uppercase', marginBottom:'2px' }}>{f.l}</p>
+              <p style={{ fontSize:'0.82rem', fontWeight:600, color:'#111827' }}>{f.v || '—'}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Nota korisnika */}
+        {editedProp.note && (
+          <div style={{ background:'#fffbeb', borderRadius:'10px', padding:'10px 14px',
+            marginBottom:'12px', fontSize:'0.82rem', color:'#92400e' }}>
+            💬 {editedProp.note}
+          </div>
+        )}
+
+        {/* AI sekcija */}
+        {!aiDone ? (
+          <div style={{ background:'#eff6ff', borderRadius:'12px', padding:'16px',
+            textAlign:'center', marginBottom:'14px', border:'1px solid #bfdbfe' }}>
+            <p style={{ fontWeight:700, color:'#1e40af', marginBottom:'4px' }}>🤖 AI generisanje sadržaja</p>
+            <p style={{ fontSize:'0.78rem', color:'#3b82f6', marginBottom:'12px' }}>
+              Opis, SEO meta, sezona — automatski za 2 sekunde
+            </p>
+            <button onClick={runAI} disabled={aiLoading}
+              style={{ background:aiLoading?'#bfdbfe':'#2563eb', color:'#fff', border:'none',
+                borderRadius:'8px', padding:'8px 20px', fontWeight:700,
+                fontSize:'0.82rem', cursor:aiLoading?'default':'pointer' }}>
+              {aiLoading ? '⟳ Generišem...' : '⚡ Pokreni AI'}
+            </button>
+          </div>
+        ) : editMode ? (
+          <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginBottom:'14px' }}>
+            {[
+              { key:'ai_name', label:'Naziv', multi:false },
+              { key:'ai_short_description', label:'Kratki opis', multi:true },
+              { key:'ai_best_season', label:'Sezona', multi:false },
+            ].map(f => (
+              <div key={f.key}>
+                <label style={{ fontSize:'0.68rem', fontWeight:700, color:'#6b7280',
+                  textTransform:'uppercase', display:'block', marginBottom:'3px' }}>
+                  🤖 {f.label}
+                </label>
+                {f.multi ? (
+                  <textarea value={editedProp[f.key] || ''} onChange={setField(f.key)}
+                    style={{ width:'100%', border:'1.5px solid #2d6a2d', borderRadius:'8px',
+                      padding:'8px 10px', fontSize:'0.82rem', resize:'vertical',
+                      minHeight:'60px', outline:'none', boxSizing:'border-box' as any }} />
+                ) : (
+                  <input value={editedProp[f.key] || ''} onChange={setField(f.key)}
+                    style={{ width:'100%', border:'1.5px solid #2d6a2d', borderRadius:'8px',
+                      padding:'8px 10px', fontSize:'0.82rem', outline:'none', boxSizing:'border-box' as any }} />
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ background:'#f0fdf4', borderRadius:'10px', padding:'12px 14px',
+            marginBottom:'14px', border:'1px solid #bbf7d0', fontSize:'0.82rem',
+            color:'#166534', lineHeight:1.7 }}>
+            <p>✅ <strong>AI opis:</strong> {editedProp.ai_short_description?.slice(0,120)}...</p>
+            {editedProp.ai_best_season && <p>🗓️ <strong>Sezona:</strong> {editedProp.ai_best_season}</p>}
+          </div>
+        )}
+
+        {/* GPS link */}
+        {editedProp.lat && (
+          <a href={`https://maps.google.com/?q=${editedProp.lat},${editedProp.lng}`}
+            target="_blank" rel="noreferrer"
+            style={{ display:'inline-flex', alignItems:'center', gap:'4px', fontSize:'0.78rem',
+              color:'#1d4ed8', fontWeight:600, marginBottom:'14px', textDecoration:'none' }}>
+            🗺️ Otvori na Google Maps ↗
+          </a>
+        )}
+
+        {/* Admin nota */}
+        {isPending && (
+          <textarea value={adminNote} onChange={e => setAdminNote(e.target.value)}
+            placeholder="Admin napomena (opciono — razlog odbijanja...)"
+            style={{ width:'100%', border:'1.5px solid #e5e7eb', borderRadius:'10px',
+              padding:'10px 12px', fontSize:'0.82rem', resize:'vertical',
+              minHeight:'56px', outline:'none', marginBottom:'12px',
+              boxSizing:'border-box' as any, background:'#fafaf9' }} />
+        )}
+
+        {/* Buttons */}
+        {isPending && (
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
+            <button onClick={() => onReject(prop.id, adminNote)}
+              style={{ padding:'11px', borderRadius:'10px', border:'2px solid #fca5a5',
+                background:'#fff5f5', color:'#dc2626', fontWeight:700, fontSize:'0.85rem',
+                cursor:'pointer' }}>
+              ✕ Odbij
+            </button>
+            <button onClick={() => onApprove({ ...editedProp, id: prop.id })} disabled={!aiDone}
+              style={{ padding:'11px', borderRadius:'10px', border:'none',
+                background: aiDone ? 'linear-gradient(135deg,#1e3d1e,#2d6a2d)' : '#e5e7eb',
+                color: aiDone ? '#fff' : '#9ca3af', fontWeight:700, fontSize:'0.85rem',
+                cursor: aiDone ? 'pointer' : 'default',
+                boxShadow: aiDone ? '0 4px 12px rgba(45,106,45,0.3)' : 'none' }}>
+              {aiDone ? '✓ Odobri i objavi' : 'Pokreni AI prvo'}
+            </button>
+          </div>
+        )}
+        {!isPending && (
+          <div style={{ background: prop.status==='approved' ? '#d1fae5' : '#fee2e2',
+            borderRadius:'10px', padding:'12px', textAlign:'center', fontWeight:700,
+            color: prop.status==='approved' ? '#065f46' : '#991b1b', fontSize:'0.88rem' }}>
+            {prop.status==='approved' ? '✅ Odobreno i objavljeno' : '✕ Odbijeno'}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────
 interface Props {
   user: any; countries: any[]; categories: any[]; regions: any[]; locations: any[]
 }
@@ -33,6 +250,7 @@ const EMPTY = {
   permit_required: false, permit_info: '', access_notes: '', is_published: true,
 }
 
+// ─── AdminDashboard ───────────────────────────────────────────────
 export default function AdminDashboard({ user, countries, categories, regions, locations }: Props) {
   const router = useRouter()
   useEffect(() => {
@@ -40,6 +258,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
       if (!session) window.location.href = '/admin/login'
     })
   }, [])
+
   type Tab = 'locations' | 'add' | 'csv' | 'proposals'
   const [tab, setTab] = useState<Tab>('locations')
   const [form, setForm] = useState({ ...EMPTY })
@@ -56,65 +275,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
   const [proposalMsg, setProposalMsg] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  async function loadProposals() {
-    setProposalsLoading(true)
-    const { data } = await supabase
-      .from('location_proposals')
-      .select('*')
-      .order('created_at', { ascending: false })
-    setProposals(data ?? [])
-    setProposalsLoading(false)
-  }
-
-  async function approveProposal(prop: any) {
-    setProposalMsg('⏳ Odobravam...')
-    // Napravi lokaciju iz predloga
-    const cat = categories.find(c => c.slug === prop.category_slug || c.name === prop.category)
-    const country = countries.find(c => c.name === prop.country || c.slug === 'srbija')
-    const region  = regions.find(r => r.name === prop.region) ?? regions[0]
-
-    const slug = (prop.ai_name || prop.geo_name || prop.name || 'lokacija')
-      .toLowerCase()
-      .replace(/[čć]/g,'c').replace(/[šđ]/g,'s').replace(/ž/g,'z')
-      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
-      + '-' + prop.id
-
-    const { error } = await supabase.from('locations').insert({
-      name:              prop.ai_name || prop.geo_name || prop.name,
-      slug,
-      short_description: prop.ai_short_description || prop.description || '',
-      description:       prop.ai_description || prop.description || '',
-      lat:               prop.lat,
-      lng:               prop.lng,
-      category_id:       cat?.id ?? null,
-      country_id:        country?.id ?? null,
-      region_id:         region?.id ?? null,
-      is_published:      true,
-      is_featured:       false,
-      best_season:       prop.ai_best_season || '',
-      permit_required:   prop.ai_permit_required ?? false,
-      image_url:         prop.photo_urls?.[0] ?? null,
-    })
-
-    if (error) { setProposalMsg('❌ Greška: ' + error.message); return }
-
-    await supabase.from('location_proposals')
-      .update({ status: 'approved', reviewed_at: new Date().toISOString() })
-      .eq('id', prop.id)
-
-    setProposalMsg('✅ Lokacija objavljena!')
-    loadProposals()
-  }
-
-  async function rejectProposal(id: number, adminNote: string) {
-    await supabase.from('location_proposals')
-      .update({ status: 'rejected', admin_note: adminNote, reviewed_at: new Date().toISOString() })
-      .eq('id', id)
-    setProposalMsg('Predlog odbijen.')
-    loadProposals()
-  }
-
-    const ic = `w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white`
+  const ic = `w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500`
   const lc = `block text-sm font-medium text-gray-700 mb-1`
 
   async function handleAIGenerate() {
@@ -126,7 +287,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     try {
       const res = await fetch('/api/ai-generate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: form.name, category: cat?.slug ?? 'ribolov', country: ctr?.name ?? 'Srbija', region: reg?.name ?? '' }),
+        body: JSON.stringify({ name: form.name, category: cat?.slug ?? 'ribolov', country: ctr?.name ?? 'Srbija', region: reg?.name ?? '' })
       })
       const json = await res.json()
       if (!res.ok || json.error) throw new Error(json.error ?? 'Greška')
@@ -170,7 +331,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     reader.onload = ev => {
       const rows = parseCSV(ev.target?.result as string)
       setCsvRows(rows)
-      setCsvMsg(rows.length > 0 ? `✅ Učitano ${rows.length} redova. Proveri preview pa klikni Import.` : '❌ Prazan ili pogrešan format.')
+      setCsvMsg(rows.length > 0 ? `✅ Učitano ${rows.length} redova. Proveri preview pa klikni Import.` : '❌ Problem sa CSV formatom.')
       setCsvErrors([])
     }
     reader.readAsText(file)
@@ -191,11 +352,9 @@ export default function AdminDashboard({ user, countries, categories, regions, l
   }
 
   function downloadTemplate() {
-    const header = 'name;slug;lat;lng;category_slug;country_slug;region_name;short_description;best_season;permit_required;permit_info;access_notes'
+    const header = 'name;slug;lat;lng;category_slug;country_slug;region_name;short_description;best_season;permit_required'
     const rows = [
-      'Uvac Kanjon;uvac-kanjon;43.4512;19.8934;ribolov;srbija;Zlatibor;Spektakularni kanjon sa bogatim ribolovom;April — Oktobar;true;Ribolovačka dozvola JVP Srbijavode;Asfaltnim putem do Kokin Broda',
-      'Vlasinska Jezero;vlasinska-jezero;42.7234;22.3456;ribolov;srbija;Pčinja;Veštačko jezero bogato šaranom i štukama;Maj — Septembar;false;;Parking na obali',
-      'Fruška Gora — Lov;fruska-gora-lov;45.1234;19.7890;lov;srbija;Srem;Lovište na Fruškoj Gori;Oktobar — Februar;true;Lovačka dozvola LD Vojvodina;Pristup šumskim putevima',
+      'Uvac Kanjon;uvac-kanjon;43.4512;19.8934;ribolov;srbija;Zlatibor;Spektakularni kanjon sa bogatim ribolovom;April — Oktobar;false',
     ].join('\n')
     const blob = new Blob([header + '\n' + rows], { type: 'text/csv;charset=utf-8;' })
     const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'outdoorbalkans-template.csv' })
@@ -207,11 +366,63 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     router.refresh()
   }
 
+  async function loadProposals() {
+    setProposalsLoading(true)
+    const { data } = await supabase
+      .from('location_proposals')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setProposals(data ?? [])
+    setProposalsLoading(false)
+  }
+
+  async function approveProposal(prop: any) {
+    setProposalMsg('⏳ Odobravam...')
+    const cat = categories.find(c => c.slug === prop.category_slug || c.name === prop.category)
+    const country = countries.find(c => c.name === prop.country || c.slug === 'srbija')
+    const region = regions.find(r => r.name === prop.region) ?? regions[0]
+    const slug = (prop.ai_name || prop.geo_name || prop.name || 'lokacija')
+      .toLowerCase()
+      .replace(/[čć]/g,'c').replace(/[šđ]/g,'s').replace(/ž/g,'z')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+      + '-' + prop.id
+    const { error } = await supabase.from('locations').insert({
+      name: prop.ai_name || prop.geo_name || prop.name,
+      slug,
+      short_description: prop.ai_short_description || prop.description || '',
+      description: prop.ai_description || prop.description || '',
+      lat: prop.lat, lng: prop.lng,
+      category_id: cat?.id ?? null,
+      country_id: country?.id ?? null,
+      region_id: region?.id ?? null,
+      is_published: true, is_featured: false,
+      best_season: prop.ai_best_season || '',
+      permit_required: prop.ai_permit_required ?? false,
+      image_url: prop.photo_urls?.[0] ?? null,
+    })
+    if (error) { setProposalMsg('❌ Greška: ' + error.message); return }
+    await supabase.from('location_proposals')
+      .update({ status: 'approved', reviewed_at: new Date().toISOString() })
+      .eq('id', prop.id)
+    setProposalMsg('✅ Lokacija objavljena na sajtu!')
+    loadProposals()
+  }
+
+  async function rejectProposal(id: number, adminNote: string) {
+    await supabase.from('location_proposals')
+      .update({ status: 'rejected', admin_note: adminNote, reviewed_at: new Date().toISOString() })
+      .eq('id', id)
+    setProposalMsg('Predlog odbijen.')
+    loadProposals()
+  }
+
+  const pendingCount = proposals.filter(p => p.status === 'pending').length
+
   const TABS: { id: Tab; label: string }[] = [
     { id: 'locations', label: `📋 Lokacije (${locations.length})` },
     { id: 'add', label: '✨ Dodaj + AI' },
     { id: 'csv', label: '📥 CSV Import' },
-    { id: 'proposals', label: `🔔 Predlozi${proposals.length > 0 ? ` (${proposals.filter(p=>p.status==='pending').length})` : ''}` },
+    { id: 'proposals', label: `🔔 Predlozi${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
   ]
 
   return (
@@ -234,9 +445,10 @@ export default function AdminDashboard({ user, countries, categories, regions, l
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex gap-2 mb-8 flex-wrap">
           {TABS.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)}
+            <button key={t.id}
+              onClick={() => { setTab(t.id); if (t.id === 'proposals') loadProposals() }}
               className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-colors
-                ${tab === t.id ? 'bg-green-700 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-700 hover:border-green-300'}`}>
+                ${tab === t.id ? 'bg-green-700 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
               {t.label}
             </button>
           ))}
@@ -286,8 +498,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
         {tab === 'add' && (
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
             <h2 className="text-xl font-bold text-gray-800 mb-1">Dodaj Novu Lokaciju</h2>
-            <p className="text-gray-500 text-sm mb-6">Upiši naziv + odaberi kategoriju i državu → klikni AI dugme za automatski opis.</p>
-
+            <p className="text-gray-500 text-sm mb-6">Upiši naziv + odaberi kategoriju i državu → klikni AI dugme za automatsko popunjavanje.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2">
                 <label className={lc}>Naziv lokacije *</label>
@@ -303,7 +514,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
               </div>
               <div>
                 <label className={lc}>Država *</label>
-                <select value={form.country_id} required className={ic} onChange={e => setForm(f => ({ ...f, country_id: e.target.value, region_id: '' }))}>
+                <select value={form.country_id} required className={ic} onChange={e => setForm(f => ({ ...f, country_id: e.target.value }))}>
                   <option value="">— Odaberi —</option>
                   {countries.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
@@ -321,7 +532,6 @@ export default function AdminDashboard({ user, countries, categories, regions, l
                 <input value={form.slug} className={ic} placeholder="auto-generisan"
                   onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} />
               </div>
-
               <div className="md:col-span-2 bg-blue-50 border border-blue-100 rounded-xl p-4">
                 <p className="text-sm font-semibold text-blue-900 mb-3">🗺️ GPS Koordinate * — Google Maps → desni klik → kopiraj</p>
                 <div className="grid grid-cols-2 gap-3">
@@ -337,7 +547,6 @@ export default function AdminDashboard({ user, countries, categories, regions, l
                   </div>
                 </div>
               </div>
-
               <div className="md:col-span-2">
                 <div className="flex items-center gap-3 p-4 bg-purple-50 border border-purple-100 rounded-xl">
                   <div className="flex-1">
@@ -345,17 +554,12 @@ export default function AdminDashboard({ user, countries, categories, regions, l
                     <p className="text-xs text-purple-600 mt-0.5">Automatski popunjava opis, SEO, sezonu i dozvole</p>
                   </div>
                   <button type="button" onClick={handleAIGenerate} disabled={aiLoading}
-                    className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-60 shrink-0 flex items-center gap-2">
-                    {aiLoading ? <><span className="animate-spin inline-block">⏳</span> Generiše...</> : '✨ AI Generiši'}
+                    className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50">
+                    {aiLoading ? '⏳ Generiše...' : '✨ AI Generiši'}
                   </button>
                 </div>
-                {aiMsg && (
-                  <p className={`text-sm mt-2 px-3 py-2 rounded-lg ${aiMsg.startsWith('✅') ? 'bg-green-50 text-green-800' : aiMsg.startsWith('❌') ? 'bg-red-50 text-red-800' : 'bg-blue-50 text-blue-800'}`}>
-                    {aiMsg}
-                  </p>
-                )}
+                {aiMsg && <p className={`text-sm mt-2 px-3 py-2 rounded-lg ${aiMsg.startsWith('✅') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>{aiMsg}</p>}
               </div>
-
               <div className="md:col-span-2">
                 <label className={lc}>Kratki opis * (max 200 znakova)</label>
                 <textarea value={form.short_description} required rows={2} maxLength={200} className={ic} placeholder="AI će popuniti..."
@@ -395,15 +599,10 @@ export default function AdminDashboard({ user, countries, categories, regions, l
                 <label htmlFor="pub" className="text-sm font-medium text-gray-700 cursor-pointer">Odmah objavi</label>
               </div>
             </div>
-
-            {msg && (
-              <div className={`mt-4 p-3 rounded-xl text-sm ${msg.startsWith('✅') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
-                {msg}
-              </div>
-            )}
+            {msg && <div className={`mt-4 p-3 rounded-xl text-sm ${msg.startsWith('✅') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>{msg}</div>}
             <div className="flex gap-3 mt-6">
               <button type="submit" disabled={saving}
-                className="bg-green-700 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-800 disabled:opacity-60">
+                className="bg-green-700 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-800 disabled:opacity-50">
                 {saving ? '⏳ Čuvam...' : '💾 Sačuvaj Lokaciju'}
               </button>
               <button type="button" onClick={() => { setForm({ ...EMPTY }); setMsg(''); setAiMsg('') }}
@@ -414,45 +613,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
           </form>
         )}
 
-        {tab === 'proposals' && (
-        <div style={{ padding:'8px 0' }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px' }}>
-            <h2 className="text-xl font-bold text-gray-800">🔔 Predlozi lokacija</h2>
-            <button onClick={loadProposals}
-              style={{ border:'1px solid #e5e7eb', background:'#fff', borderRadius:'8px',
-                padding:'6px 14px', fontSize:'0.82rem', cursor:'pointer', fontWeight:600 }}>
-              ↻ Osvježi
-            </button>
-          </div>
-          {proposalMsg && (
-            <div style={{ background: proposalMsg.startsWith('✅') ? '#d1fae5' : proposalMsg.startsWith('❌') ? '#fee2e2' : '#fef3c7',
-              borderRadius:'10px', padding:'10px 16px', marginBottom:'16px',
-              fontWeight:600, fontSize:'0.88rem',
-              color: proposalMsg.startsWith('✅') ? '#065f46' : proposalMsg.startsWith('❌') ? '#991b1b' : '#92400e' }}>
-              {proposalMsg}
-            </div>
-          )}
-          {proposalsLoading ? (
-            <div style={{ textAlign:'center', padding:'40px', color:'#9ca3af' }}>⏳ Učitavam...</div>
-          ) : proposals.length === 0 ? (
-            <div style={{ textAlign:'center', padding:'60px', color:'#9ca3af' }}>
-              <div style={{ fontSize:'2.5rem', marginBottom:'12px' }}>📭</div>
-              <p style={{ fontWeight:600 }}>Nema predloga</p>
-              <p style={{ fontSize:'0.85rem', marginTop:'4px' }}>Novi predlozi će se pojaviti ovdje</p>
-            </div>
-          ) : (
-            <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
-              {proposals.map((prop: any) => (
-                <ProposalCard key={prop.id} prop={prop}
-                  categories={categories} countries={countries} regions={regions}
-                  onApprove={approveProposal} onReject={rejectProposal} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {tab === 'csv' && (
+        {tab === 'csv' && (
           <div className="space-y-6">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4">📥 CSV Import</h2>
@@ -466,61 +627,36 @@ export default function AdminDashboard({ user, countries, categories, regions, l
                   <li>Uploaduj i klikni Import</li>
                 </ol>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs">
-                <div>
-                  <p className="font-semibold text-gray-600 mb-1">Obavezno:</p>
-                  {['name','lat','lng','category_slug','country_slug'].map(c => (
-                    <span key={c} className="block bg-red-100 text-red-700 font-mono px-2 py-0.5 rounded mb-1">{c}</span>
-                  ))}
-                </div>
-                <div className="col-span-1 sm:col-span-3">
-                  <p className="font-semibold text-gray-600 mb-1">Opciono:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {['slug','region_name','short_description','description','best_season','permit_required','permit_info','access_notes'].map(c => (
-                      <span key={c} className="bg-gray-100 text-gray-600 font-mono px-2 py-0.5 rounded">{c}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
               <div className="flex gap-3 flex-wrap">
                 <button onClick={downloadTemplate}
                   className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700">
                   ⬇️ Preuzmi Template
                 </button>
-                <label className="flex items-center gap-2 bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-800 cursor-pointer">
+                <label className="flex items-center gap-2 bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold cursor-pointer hover:bg-green-800">
                   📂 Učitaj CSV
                   <input ref={fileRef} type="file" accept=".csv,.txt" onChange={handleCSVFile} className="hidden" />
                 </label>
               </div>
-              {csvMsg && (
-                <p className={`mt-4 p-3 rounded-xl text-sm ${csvMsg.startsWith('✅') ? 'bg-green-50 text-green-800 border border-green-200' : csvMsg.startsWith('❌') ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-blue-50 text-blue-800 border border-blue-200'}`}>
-                  {csvMsg}
-                </p>
-              )}
+              {csvMsg && <p className={`mt-4 p-3 rounded-xl text-sm ${csvMsg.startsWith('✅') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>{csvMsg}</p>}
               {csvErrors.length > 0 && (
                 <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl">
-                  <p className="text-xs font-semibold text-red-700 mb-2">Greške:</p>
                   <ul className="text-xs text-red-600 space-y-1">{csvErrors.map((e, i) => <li key={i}>• {e}</li>)}</ul>
                 </div>
               )}
             </div>
-
             {csvRows.length > 0 && (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                  <div>
-                    <h3 className="font-bold text-gray-800">Preview — {csvRows.length} lokacija</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">Proveri podatke pre importa</p>
-                  </div>
+                  <h3 className="font-bold text-gray-800">Preview — {csvRows.length} lokacija</h3>
                   <button onClick={handleCSVImport} disabled={csvImporting}
-                    className="bg-green-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-green-800 disabled:opacity-60 flex items-center gap-2">
+                    className="bg-green-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-green-800 disabled:opacity-50">
                     {csvImporting ? '⏳ Importujem...' : `🚀 Importuj ${csvRows.length} lokacija`}
                   </button>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead className="bg-gray-50">
-                      <tr>{Object.keys(csvRows[0]).map(h => <th key={h} className="text-left px-3 py-2 font-semibold text-gray-600 whitespace-nowrap">{h}</th>)}</tr>
+                      <tr>{Object.keys(csvRows[0]).map(h => <th key={h} className="text-left px-3 py-2 font-semibold text-gray-600">{h}</th>)}</tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                       {csvRows.slice(0, 10).map((row, i) => (
@@ -530,8 +666,45 @@ export default function AdminDashboard({ user, countries, categories, regions, l
                       ))}
                     </tbody>
                   </table>
-                  {csvRows.length > 10 && <p className="text-xs text-gray-400 text-center py-3">+{csvRows.length - 10} redova...</p>}
+                  {csvRows.length > 10 && <p className="text-xs text-gray-400 text-center py-3">+{csvRows.length - 10} više redova</p>}
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === 'proposals' && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-800">🔔 Predlozi lokacija</h2>
+              <button onClick={loadProposals}
+                style={{ border:'1px solid #e5e7eb', background:'#fff', borderRadius:'8px',
+                  padding:'6px 14px', fontSize:'0.82rem', cursor:'pointer', fontWeight:600 }}>
+                ↻ Osvježi
+              </button>
+            </div>
+            {proposalMsg && (
+              <div style={{ background: proposalMsg.startsWith('✅') ? '#d1fae5' : proposalMsg.startsWith('❌') ? '#fee2e2' : '#fef3c7',
+                borderRadius:'10px', padding:'10px 16px', marginBottom:'16px', fontWeight:600, fontSize:'0.88rem',
+                color: proposalMsg.startsWith('✅') ? '#065f46' : proposalMsg.startsWith('❌') ? '#991b1b' : '#92400e' }}>
+                {proposalMsg}
+              </div>
+            )}
+            {proposalsLoading ? (
+              <div style={{ textAlign:'center', padding:'60px', color:'#9ca3af' }}>⏳ Učitavam...</div>
+            ) : proposals.length === 0 ? (
+              <div style={{ textAlign:'center', padding:'60px', color:'#9ca3af' }}>
+                <div style={{ fontSize:'3rem', marginBottom:'12px' }}>📭</div>
+                <p style={{ fontWeight:600, fontSize:'1rem' }}>Nema predloga</p>
+                <p style={{ fontSize:'0.85rem', marginTop:'4px' }}>Novi predlozi će se pojaviti ovdje automatski</p>
+              </div>
+            ) : (
+              <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+                {proposals.map((prop: any) => (
+                  <ProposalCard key={prop.id} prop={prop}
+                    categories={categories} countries={countries} regions={regions}
+                    onApprove={approveProposal} onReject={rejectProposal} />
+                ))}
               </div>
             )}
           </div>
