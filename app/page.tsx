@@ -46,7 +46,7 @@ export default async function HomePage() {
       <section style={{ position: 'relative', height: '75vh', minHeight: '520px', overflow: 'hidden' }}>
         <HeroSlider catData={CAT} />
         <div className='hero-content' style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column',
-          alignItems: 'flex-start', justifyContent: 'center', height: '100%', textAlign: 'left', padding: '0 24px 70px' }}>
+          alignItems: 'flex-start', justifyContent: 'center', height: '100%', textAlign: 'left', padding: '0 5vw 70px 5vw', maxWidth: '480px' }}>
                     <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.72rem', fontWeight: 700,
             textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '14px',
             textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
@@ -57,19 +57,20 @@ export default async function HomePage() {
             textShadow: '0 2px 24px rgba(0,0,0,0.5)', maxWidth: '13ch' }}>
             Kroči u divljinu..
           </h1>
-          <form action='/pretraga' method='GET' className='hero-search-wrap' className='hero-search' style={{ width: '100%', maxWidth: '440px', marginBottom: '12px' }}>
+          <form action='/pretraga' method='GET' style={{ width: '100%', maxWidth: '420px', marginBottom: '12px', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', alignItems: 'center', background: '#fff',
-              borderRadius: '999px', padding: '6px 6px 6px 22px',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.35)', gap: '8px' }}>
-              <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#8fa68f' strokeWidth='2.5' strokeLinecap='round' style={{ flexShrink: 0 }}>
+              borderRadius: '999px', padding: '5px 5px 5px 18px',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.35)', gap: '6px',
+              width: '100%', boxSizing: 'border-box' }}>
+              <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#8fa68f' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' style={{ flexShrink: 0 }}>
                 <circle cx='11' cy='11' r='8'/><path d='m21 21-4.35-4.35'/>
               </svg>
-              <input name='q' type='search' placeholder='Pretraži reke, planine, lovišta...'
-                style={{ flex: 1, border: 'none', outline: 'none', fontSize: '1rem',
+              <input name='q' type='search' placeholder='Pretraži reke, planine...'
+                style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', fontSize: '0.92rem',
                   color: '#0e1a0e', background: 'transparent', padding: '8px 0', fontFamily: 'inherit' }} />
               <button type='submit' style={{ background: '#2d6a2d', color: '#fff', border: 'none',
-                borderRadius: '999px', padding: '10px 20px', fontSize: '0.88rem',
-                fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>Pretraži</button>
+                borderRadius: '999px', padding: '10px 18px', fontSize: '0.88rem',
+                fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>Pretraži</button>
             </div>
           </form>
           <Link href='/pretraga?advanced=1' style={{ color: 'rgba(255,255,255,0.88)',
