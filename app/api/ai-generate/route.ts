@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { requireAdmin } from '@/lib/adminGuard'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function POST(request: NextRequest) {
+  const guard = await requireAdmin()
+  if ('error' in guard) return guard.error
+
   const { name, category, country, region } = await request.json()
   if (!name) return NextResponse.json({ error: 'Naziv je obavezan' }, { status: 400 })
 
   const catMap: Record<string, string> = { ribolov: 'ribolov (fishing)', lov: 'lov (hunting)' }
-
   const prompt = `Ti si stručnjak za outdoor aktivnosti na Balkanu.
 Na osnovu sledećih informacija generiši sadržaj za outdoor direktorijum.
-
 Lokacija: ${name}
 Aktivnost: ${catMap[category] ?? category}
 Država: ${country}
 Region: ${region}
-
 Generiši ISKLJUČIVO JSON objekat (bez teksta pre ili posle):
 {
   "short_description": "Kratki opis 1-2 rečenice max 180 znakova za karticu",
