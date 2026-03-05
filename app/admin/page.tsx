@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { redirect } from 'next/navigation'
 import AdminDashboard from './AdminDashboard'
 
 export default async function AdminPage() {
@@ -11,21 +12,19 @@ export default async function AdminPage() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        // Server Component ne sme pisati cookies — ignorisi tiho
         setAll: () => {},
       },
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user ?? null
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/admin/login')
 
   const [
     { data: countries  },
     { data: categories },
     { data: regions    },
     { data: locations  },
-    { data: proposals  },
   ] = await Promise.all([
     supabase.from('countries').select('id, name, slug').eq('is_active', true).order('name'),
     supabase.from('categories').select('id, name, slug, icon').eq('is_active', true),
@@ -36,19 +35,15 @@ export default async function AdminPage() {
       countries(name, slug),
       regions(name)
     `).order('created_at', { ascending: false }),
-    supabase.from('location_proposals')
-      .select('*').eq('status', 'pending')
-      .order('vote_count', { ascending: false }),
   ])
 
   return (
     <AdminDashboard
-      user={user!}
+      user={user}
       countries={countries   ?? []}
       categories={categories ?? []}
       regions={regions       ?? []}
       locations={locations   ?? []}
-      proposals={proposals   ?? []}
     />
   )
 }

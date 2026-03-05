@@ -46,11 +46,16 @@ export default async function HomePage() {
       <section style={{ position: 'relative', height: '75vh', minHeight: '520px', overflow: 'hidden' }}>
         <HeroSlider catData={CAT} />
         <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', padding: '0 24px 70px' }}>
-          <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(1.8rem,4vw,3.4rem)', fontWeight: 900,
+          alignItems: 'flex-start', justifyContent: 'center', height: '100%', textAlign: 'left', padding: '0 24px 70px' }}>
+                    <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.72rem', fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '14px',
+            textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
+            Outdoor Balkan
+          </p>
+          <h1 style={{ fontFamily: SERIF, fontSize: 'clamp(1.9rem,4.5vw,3.6rem)', fontWeight: 900,
             color: '#fff', lineHeight: 1.1, marginBottom: '28px',
             textShadow: '0 2px 24px rgba(0,0,0,0.5)', maxWidth: '13ch' }}>
-            Tvoja sledeća avantura počinje ovde.
+            Kroči u divljinu..
           </h1>
           <form action='/pretraga' method='GET' style={{ width: '100%', maxWidth: '560px', marginBottom: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', background: '#fff',
@@ -250,7 +255,7 @@ export default async function HomePage() {
               <a key={s.label} href={s.href} target='_blank' rel='noopener noreferrer'
                 style={{ width: '44px', height: '44px', borderRadius: '12px',
                   background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
                   color: s.color, textDecoration: 'none' }}>
                 <svg viewBox='0 0 24 24' width='20' height='20' fill='currentColor'>
                   <path d={s.path} />
