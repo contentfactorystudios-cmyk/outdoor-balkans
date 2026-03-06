@@ -280,6 +280,13 @@ export default function AdminDashboard({ user, countries, categories, regions, l
   const [editAiMsg, setEditAiMsg] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
+  // Bulk AI Generate
+  const [selectedLocations, setSelectedLocations] = useState<number[]>([])
+  const [bulkAiRunning, setBulkAiRunning] = useState(false)
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0, success: 0, failed: 0 })
+  const [bulkResults, setBulkResults] = useState<any[]>([])
+  const [showBulkModal, setShowBulkModal] = useState(false)
+
   const ic = `w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500`
   const lc = `block text-sm font-medium text-gray-700 mb-1`
 
@@ -426,6 +433,82 @@ export default function AdminDashboard({ user, countries, categories, regions, l
 
   const pendingCount = proposals.filter(p => p.status === 'pending').length
 
+  // Bulk AI Functions
+  function toggleLocationSelect(id: number) {
+    setSelectedLocations(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    )
+  }
+
+  function selectAllLocations() {
+    if (selectedLocations.length === locations.length) {
+      setSelectedLocations([])
+    } else {
+      setSelectedLocations(locations.map((loc: any) => loc.id))
+    }
+  }
+
+  async function runBulkAiGenerate() {
+    if (selectedLocations.length === 0) return
+    setBulkAiRunning(true)
+    setBulkProgress({ current: 0, total: selectedLocations.length, success: 0, failed: 0 })
+    setBulkResults([])
+    setShowBulkModal(true)
+
+    const results: any[] = []
+
+    for (let i = 0; i < selectedLocations.length; i++) {
+      const locId = selectedLocations[i]
+      const loc = locations.find((l: any) => l.id === locId)
+      
+      try {
+        const res = await fetch('/api/bulk-ai-generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ locationIds: [locId] })
+        })
+        const data = await res.json()
+        
+        const success = data.success > 0
+        results.push({
+          id: locId,
+          name: loc?.name || 'Nepoznato',
+          status: success ? 'success' : 'failed',
+          error: success ? null : (data.errors?.[0] || 'Greška')
+        })
+
+        setBulkProgress(prev => ({
+          ...prev,
+          current: i + 1,
+          success: prev.success + (success ? 1 : 0),
+          failed: prev.failed + (success ? 0 : 1)
+        }))
+        setBulkResults([...results])
+
+        // Pauza od 2 sekunde između poziva
+        if (i < selectedLocations.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000))
+        }
+      } catch (err: any) {
+        results.push({
+          id: locId,
+          name: loc?.name || 'Nepoznato',
+          status: 'failed',
+          error: err.message
+        })
+        setBulkProgress(prev => ({
+          ...prev,
+          current: i + 1,
+          failed: prev.failed + 1
+        }))
+        setBulkResults([...results])
+      }
+    }
+
+    setBulkAiRunning(false)
+    router.refresh()
+  }
+
   const TABS: { id: Tab; label: string }[] = [
     { id: 'locations', label: `📋 Lokacije (${locations.length})` },
     { id: 'add', label: '✨ Dodaj + AI' },
@@ -464,46 +547,84 @@ export default function AdminDashboard({ user, countries, categories, regions, l
         </div>
 
         {tab === 'locations' && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-100">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Naziv</th>
-                    <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Kat.</th>
-                    <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Država</th>
-                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
-                    <th className="px-4 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {locations.map((loc: any) => (
-                    <tr key={loc.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-gray-800">{loc.name}</td>
-                      <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{loc.categories?.icon} {loc.categories?.name}</td>
-                      <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{loc.countries?.name}</td>
-                      <td className="px-4 py-3">
-                        <button onClick={() => togglePublish(loc.id, loc.is_published)}
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors
-                            ${loc.is_published ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                          {loc.is_published ? '✅ Objavljeno' : '⏸️ Skriveno'}
-                        </button>
-                      </td>
-                      <td className="px-4 py-3 flex gap-3 items-center">
-                        {loc.countries?.slug && loc.categories?.slug && (
-                          <a href={`/${loc.countries.slug}/${loc.categories.slug}/${loc.slug}`} target="_blank"
-                            className="text-green-600 hover:text-green-800 text-xs font-medium">Vidi →</a>
-                        )}
-                        <button onClick={() => {
-                          setEditLoc(loc)
-                          setTab('edit')
-                        }} className="text-blue-600 hover:text-blue-800 text-xs font-medium">✏️ Uredi</button>
-                      </td>
+          <div className="space-y-4">
+            {/* Bulk Actions Panel */}
+            {locations.length > 0 && (
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-100 p-4">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-3">
+                    <button onClick={selectAllLocations}
+                      className="px-4 py-2 bg-white border border-purple-200 rounded-xl text-sm font-semibold text-purple-900 hover:bg-purple-50 transition-colors">
+                      {selectedLocations.length === locations.length ? '☑️ Poništi sve' : '☐ Odaberi sve'}
+                    </button>
+                    {selectedLocations.length > 0 && (
+                      <span className="text-sm font-semibold text-purple-900">
+                        Odabrano: {selectedLocations.length} / {locations.length}
+                      </span>
+                    )}
+                  </div>
+                  <button onClick={runBulkAiGenerate}
+                    disabled={selectedLocations.length === 0 || bulkAiRunning}
+                    className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg">
+                    {bulkAiRunning ? '⏳ Generišem...' : `🤖 Bulk AI Generate (${selectedLocations.length})`}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                      <th className="px-4 py-3 w-10">
+                        <input type="checkbox"
+                          checked={selectedLocations.length === locations.length && locations.length > 0}
+                          onChange={selectAllLocations}
+                          className="w-4 h-4 accent-purple-600 cursor-pointer" />
+                      </th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600">Naziv</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Kat.</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600 hidden md:table-cell">Država</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
+                      <th className="px-4 py-3"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!locations.length && <div className="text-center py-12 text-gray-400">Još nema lokacija.</div>}
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {locations.map((loc: any) => (
+                      <tr key={loc.id} className={`hover:bg-gray-50 transition-colors ${selectedLocations.includes(loc.id) ? 'bg-purple-50' : ''}`}>
+                        <td className="px-4 py-3">
+                          <input type="checkbox"
+                            checked={selectedLocations.includes(loc.id)}
+                            onChange={() => toggleLocationSelect(loc.id)}
+                            className="w-4 h-4 accent-purple-600 cursor-pointer" />
+                        </td>
+                        <td className="px-4 py-3 font-medium text-gray-800">{loc.name}</td>
+                        <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{loc.categories?.icon} {loc.categories?.name}</td>
+                        <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{loc.countries?.name}</td>
+                        <td className="px-4 py-3">
+                          <button onClick={() => togglePublish(loc.id, loc.is_published)}
+                            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors
+                              ${loc.is_published ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                            {loc.is_published ? '✅ Objavljeno' : '⏸️ Skriveno'}
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 flex gap-3 items-center">
+                          {loc.countries?.slug && loc.categories?.slug && (
+                            <a href={`/${loc.countries.slug}/${loc.categories.slug}/${loc.slug}`} target="_blank"
+                              className="text-green-600 hover:text-green-800 text-xs font-medium">Vidi →</a>
+                          )}
+                          <button onClick={() => {
+                            setEditLoc(loc)
+                            setTab('edit')
+                          }} className="text-blue-600 hover:text-blue-800 text-xs font-medium">✏️ Uredi</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {!locations.length && <div className="text-center py-12 text-gray-400">Još nema lokacija.</div>}
+              </div>
             </div>
           </div>
         )}
