@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { requireAdmin } from '@/lib/adminGuard'
+import { createClient } from '@supabase/supabase-js'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const CATEGORY_SCHEMAS: Record<string, object> = {
   ribolov: {
@@ -71,13 +76,7 @@ const CATEGORY_SCHEMAS: Record<string, object> = {
   }
 }
 
-export async function POST(request: NextRequest) {
-  const guard = await requireAdmin()
-  if ('error' in guard) return guard.error
-
-  const { name, category, country, region } = await request.json()
-  if (!name) return NextResponse.json({ error: 'Naziv je obavezan' }, { status: 400 })
-
+async function generateAIContent(name: string, category: string, country: string, region: string) {
   const schema = CATEGORY_SCHEMAS[category] ?? {}
   const schemaStr = JSON.stringify(schema, null, 2)
 
@@ -113,10 +112,94 @@ Pisi na srpskom jeziku, latinicnim pismom.`
     const text = message.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join('')
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) throw new Error('AI nije vratio validan JSON')
-    const generated = JSON.parse(jsonMatch[0])
-    return NextResponse.json({ success: true, data: generated })
+    return JSON.parse(jsonMatch[0])
   } catch (error: any) {
-    console.error('[AI Generate]', error)
-    return NextResponse.json({ error: error.message ?? 'Greska' }, { status: 500 })
+    throw new Error(`AI greška: ${error.message}`)
   }
+}
+
+export async function POST(request: NextRequest) {
+  const guard = await requireAdmin()
+  if ('error' in guard) return guard.error
+
+  const { locationIds } = await request.json()
+  if (!locationIds || !Array.isArray(locationIds) || locationIds.length === 0) {
+    return NextResponse.json({ error: 'Mora biti niz ID-jeva lokacija' }, { status: 400 })
+  }
+
+  const results = {
+    success: 0,
+    failed: 0,
+    errors: [] as string[],
+    details: [] as any[]
+  }
+
+  // Učitaj sve lokacije sa related data
+  const { data: locations, error: fetchError } = await supabase
+    .from('locations')
+    .select(`
+      id, name, slug,
+      categories(slug),
+      countries(name),
+      regions(name)
+    `)
+    .in('id', locationIds)
+
+  if (fetchError || !locations) {
+    return NextResponse.json({ 
+      error: 'Greška pri učitavanju lokacija',
+      details: fetchError?.message 
+    }, { status: 500 })
+  }
+
+  // Procesuj svaku lokaciju
+  for (const loc of locations) {
+    try {
+      const aiData = await generateAIContent(
+        loc.name,
+        loc.categories?.slug || 'ribolov',
+        loc.countries?.name || 'Srbija',
+        loc.regions?.name || ''
+      )
+
+      // Update lokacije sa AI podacima
+      const { error: updateError } = await supabase
+        .from('locations')
+        .update({
+          short_description: aiData.short_description || null,
+          description: aiData.description || null,
+          meta_title: aiData.meta_title || null,
+          meta_description: aiData.meta_description || null,
+          best_season: aiData.best_season || null,
+          permit_required: aiData.permit_required ?? false,
+          permit_info: aiData.permit_info || null,
+          category_data: aiData.category_data || {},
+        })
+        .eq('id', loc.id)
+
+      if (updateError) throw new Error(updateError.message)
+
+      results.success++
+      results.details.push({
+        id: loc.id,
+        name: loc.name,
+        status: 'success'
+      })
+
+      // Rate limiting: pauza između poziva da ne prekoračimo API limite
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+    } catch (error: any) {
+      results.failed++
+      results.errors.push(`${loc.name}: ${error.message}`)
+      results.details.push({
+        id: loc.id,
+        name: loc.name,
+        status: 'failed',
+        error: error.message
+      })
+    }
+  }
+
+  return NextResponse.json(results)
 }
