@@ -4,7 +4,7 @@ import Navigation from '@/components/Navigation'
 import SocialSidebar from '@/components/SocialSidebar'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], display: 'swap', preload: false })
 
 export const metadata: Metadata = {
   title: {

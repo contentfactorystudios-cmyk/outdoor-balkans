@@ -260,7 +260,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     })
   }, [])
 
-  type Tab = 'locations' | 'add' | 'csv' | 'proposals'
+  type Tab = 'locations' | 'add' | 'edit' | 'csv' | 'proposals'
   const [tab, setTab] = useState<Tab>('locations')
   const [form, setForm] = useState({ ...EMPTY })
   const [saving, setSaving] = useState(false)
@@ -274,6 +274,10 @@ export default function AdminDashboard({ user, countries, categories, regions, l
   const [proposals, setProposals] = useState<any[]>([])
   const [proposalsLoading, setProposalsLoading] = useState(false)
   const [proposalMsg, setProposalMsg] = useState('')
+  const [editLoc, setEditLoc] = useState<any>(null)
+  const [editMsg, setEditMsg] = useState('')
+  const [editAiLoading, setEditAiLoading] = useState(false)
+  const [editAiMsg, setEditAiMsg] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const ic = `w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500`
@@ -426,6 +430,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     { id: 'locations', label: `📋 Lokacije (${locations.length})` },
     { id: 'add', label: '✨ Dodaj + AI' },
     { id: 'csv', label: '📥 CSV Import' },
+    { id: 'edit', label: editLoc ? `✏️ ${editLoc.name?.substring(0,20)}` : '✏️ Uredi' },
     { id: 'proposals', label: `🔔 Predlozi${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
   ]
 
@@ -484,11 +489,15 @@ export default function AdminDashboard({ user, countries, categories, regions, l
                           {loc.is_published ? '✅ Objavljeno' : '⏸️ Skriveno'}
                         </button>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 flex gap-3 items-center">
                         {loc.countries?.slug && loc.categories?.slug && (
                           <a href={`/${loc.countries.slug}/${loc.categories.slug}/${loc.slug}`} target="_blank"
                             className="text-green-600 hover:text-green-800 text-xs font-medium">Vidi →</a>
                         )}
+                        <button onClick={() => {
+                          setEditLoc(loc)
+                          setTab('edit')
+                        }} className="text-blue-600 hover:text-blue-800 text-xs font-medium">✏️ Uredi</button>
                       </td>
                     </tr>
                   ))}
@@ -615,6 +624,254 @@ export default function AdminDashboard({ user, countries, categories, regions, l
               </button>
             </div>
           </form>
+        )}
+
+        {tab === 'edit' && editLoc && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-800">✏️ Uredi: {editLoc.name}</h2>
+              <a href={`/${editLoc.countries?.slug}/${editLoc.categories?.slug}/${editLoc.slug}`}
+                target="_blank" className="text-sm text-green-600 hover:text-green-800">Vidi stranicu →</a>
+            </div>
+
+            {editAiMsg && <p className={`mb-4 p-3 rounded-xl text-sm ${editAiMsg.startsWith('✅') ? 'bg-green-50 text-green-800' : editAiMsg.startsWith('⏳') ? 'bg-blue-50 text-blue-800' : 'bg-red-50 text-red-800'}`}>{editAiMsg}</p>}
+            {editMsg && <p className={`mb-4 p-3 rounded-xl text-sm ${editMsg.startsWith('✅') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>{editMsg}</p>}
+
+            <div className="grid grid-cols-1 gap-4 mb-6">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Naziv</label>
+                <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.name ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, name: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Kratki opis</label>
+                <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.short_description ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, short_description: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Opis</label>
+                <textarea rows={5} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.description ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, description: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Sezona</label>
+                  <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                    value={editLoc.best_season ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, best_season: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Dozvola info</label>
+                  <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                    value={editLoc.permit_info ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, permit_info: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">SEO Title</label>
+                <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.meta_title ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, meta_title: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">SEO Description</label>
+                <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.meta_description ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, meta_description: e.target.value }))} />
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="edit_pub" className="w-4 h-4 accent-green-600"
+                  checked={editLoc.is_published ?? false}
+                  onChange={e => setEditLoc((p: any) => ({ ...p, is_published: e.target.checked }))} />
+                <label htmlFor="edit_pub" className="text-sm font-medium text-gray-700">Objavljeno</label>
+              </div>
+            </div>
+
+            <div className="flex gap-3 flex-wrap">
+              <button onClick={async () => {
+                setEditAiLoading(true)
+                setEditAiMsg('⏳ AI generise podatke...')
+                try {
+                  const res = await fetch('/api/ai-generate', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      name: editLoc.name,
+                      category: editLoc.categories?.slug ?? '',
+                      country: editLoc.countries?.name ?? 'Srbija',
+                      region: editLoc.regions?.name ?? '',
+                    })
+                  })
+                  const json = await res.json()
+                  if (!res.ok || json.error) throw new Error(json.error ?? 'Greska')
+                  const d = json.data
+                  setEditLoc((p: any) => ({
+                    ...p,
+                    short_description: d.short_description ?? p.short_description,
+                    description: d.description ?? p.description,
+                    meta_title: d.meta_title ?? p.meta_title,
+                    meta_description: d.meta_description ?? p.meta_description,
+                    best_season: d.best_season ?? p.best_season,
+                    permit_required: d.permit_required ?? p.permit_required,
+                    permit_info: d.permit_info ?? p.permit_info,
+                    category_data: d.category_data ?? p.category_data,
+                  }))
+                  setEditAiMsg('✅ AI popunio polja! Provjeri i sacuvaj.')
+                } catch (err: any) {
+                  setEditAiMsg('❌ ' + err.message)
+                } finally {
+                  setEditAiLoading(false)
+                }
+              }} disabled={editAiLoading}
+                className="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 disabled:opacity-50">
+                {editAiLoading ? '⏳ Generisem...' : '✨ AI Regenerisi'}
+              </button>
+
+              <button onClick={async () => {
+                setEditMsg('')
+                const { error } = await supabase.from('locations').update({
+                  name: editLoc.name,
+                  short_description: editLoc.short_description,
+                  description: editLoc.description,
+                  best_season: editLoc.best_season,
+                  permit_info: editLoc.permit_info,
+                  permit_required: editLoc.permit_required,
+                  meta_title: editLoc.meta_title,
+                  meta_description: editLoc.meta_description,
+                  is_published: editLoc.is_published,
+                  category_data: editLoc.category_data ?? {},
+                }).eq('id', editLoc.id)
+                if (error) setEditMsg('❌ ' + error.message)
+                else { setEditMsg('✅ Sacuvano!'); router.refresh() }
+              }} className="bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-800">
+                💾 Sacuvaj izmene
+              </button>
+
+              <button onClick={() => { setEditLoc(null); setTab('locations') }}
+                className="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-200">
+                ← Nazad
+              </button>
+            </div>
+          </div>
+        )}
+
+        {tab === 'edit' && editLoc && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-800">✏️ Uredi: {editLoc.name}</h2>
+              <a href={`/${editLoc.countries?.slug}/${editLoc.categories?.slug}/${editLoc.slug}`}
+                target="_blank" className="text-sm text-green-600 hover:text-green-800">Vidi stranicu →</a>
+            </div>
+
+            {editAiMsg && <p className={`mb-4 p-3 rounded-xl text-sm ${editAiMsg.startsWith('✅') ? 'bg-green-50 text-green-800' : editAiMsg.startsWith('⏳') ? 'bg-blue-50 text-blue-800' : 'bg-red-50 text-red-800'}`}>{editAiMsg}</p>}
+            {editMsg && <p className={`mb-4 p-3 rounded-xl text-sm ${editMsg.startsWith('✅') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>{editMsg}</p>}
+
+            <div className="grid grid-cols-1 gap-4 mb-6">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Naziv</label>
+                <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.name ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, name: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Kratki opis</label>
+                <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.short_description ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, short_description: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Opis</label>
+                <textarea rows={5} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.description ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, description: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Sezona</label>
+                  <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                    value={editLoc.best_season ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, best_season: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Dozvola info</label>
+                  <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                    value={editLoc.permit_info ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, permit_info: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">SEO Title</label>
+                <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.meta_title ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, meta_title: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">SEO Description</label>
+                <input className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+                  value={editLoc.meta_description ?? ''} onChange={e => setEditLoc((p: any) => ({ ...p, meta_description: e.target.value }))} />
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="edit_pub" className="w-4 h-4 accent-green-600"
+                  checked={editLoc.is_published ?? false}
+                  onChange={e => setEditLoc((p: any) => ({ ...p, is_published: e.target.checked }))} />
+                <label htmlFor="edit_pub" className="text-sm font-medium text-gray-700">Objavljeno</label>
+              </div>
+            </div>
+
+            <div className="flex gap-3 flex-wrap">
+              <button onClick={async () => {
+                setEditAiLoading(true)
+                setEditAiMsg('⏳ AI generise podatke...')
+                try {
+                  const res = await fetch('/api/ai-generate', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      name: editLoc.name,
+                      category: editLoc.categories?.slug ?? '',
+                      country: editLoc.countries?.name ?? 'Srbija',
+                      region: editLoc.regions?.name ?? '',
+                    })
+                  })
+                  const json = await res.json()
+                  if (!res.ok || json.error) throw new Error(json.error ?? 'Greska')
+                  const d = json.data
+                  setEditLoc((p: any) => ({
+                    ...p,
+                    short_description: d.short_description ?? p.short_description,
+                    description: d.description ?? p.description,
+                    meta_title: d.meta_title ?? p.meta_title,
+                    meta_description: d.meta_description ?? p.meta_description,
+                    best_season: d.best_season ?? p.best_season,
+                    permit_required: d.permit_required ?? p.permit_required,
+                    permit_info: d.permit_info ?? p.permit_info,
+                    category_data: d.category_data ?? p.category_data,
+                  }))
+                  setEditAiMsg('✅ AI popunio polja! Provjeri i sacuvaj.')
+                } catch (err: any) {
+                  setEditAiMsg('❌ ' + err.message)
+                } finally {
+                  setEditAiLoading(false)
+                }
+              }} disabled={editAiLoading}
+                className="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 disabled:opacity-50">
+                {editAiLoading ? '⏳ Generisem...' : '✨ AI Regenerisi'}
+              </button>
+
+              <button onClick={async () => {
+                setEditMsg('')
+                const { error } = await supabase.from('locations').update({
+                  name: editLoc.name,
+                  short_description: editLoc.short_description,
+                  description: editLoc.description,
+                  best_season: editLoc.best_season,
+                  permit_info: editLoc.permit_info,
+                  permit_required: editLoc.permit_required,
+                  meta_title: editLoc.meta_title,
+                  meta_description: editLoc.meta_description,
+                  is_published: editLoc.is_published,
+                  category_data: editLoc.category_data ?? {},
+                }).eq('id', editLoc.id)
+                if (error) setEditMsg('❌ ' + error.message)
+                else { setEditMsg('✅ Sacuvano!'); router.refresh() }
+              }} className="bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-800">
+                💾 Sacuvaj izmene
+              </button>
+
+              <button onClick={() => { setEditLoc(null); setTab('locations') }}
+                className="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-200">
+                ← Nazad
+              </button>
+            </div>
+          </div>
         )}
 
         {tab === 'csv' && (
