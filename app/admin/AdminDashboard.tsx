@@ -1,9 +1,88 @@
 'use client'
+import React from 'react'
 
 import { useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+
+
+// ─── PhotosTab ───────────────────────────────────────────────────
+function PhotosTab() {
+  const [photos, setPhotos] = React.useState<any[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [msg, setMsg] = React.useState('')
+
+  async function load() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('location_photos')
+      .select('id, url, caption, is_approved, uploaded_at, location_id, locations(name, slug)')
+      .order('uploaded_at', { ascending: false })
+      .limit(50)
+    setPhotos(data ?? [])
+    setLoading(false)
+  }
+
+  React.useEffect(() => { load() }, [])
+
+  async function approve(id: number) {
+    await supabase.from('location_photos').update({ is_approved: true }).eq('id', id)
+    setMsg('✅ Odobreno!')
+    load()
+  }
+
+  async function reject(id: number) {
+    await supabase.from('location_photos').delete().eq('id', id)
+    setMsg('🗑️ Obrisano!')
+    load()
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-800">📸 Fotografije zajednice</h2>
+        <button onClick={load} className="text-sm text-green-700 font-semibold">↺ Osvježi</button>
+      </div>
+      {msg && <p className="text-sm p-3 rounded-xl bg-green-50 text-green-800">{msg}</p>}
+      {loading && <p className="text-gray-400 text-sm">Učitavam...</p>}
+      <div className="grid grid-cols-1 gap-4">
+        {photos.map((p: any) => (
+          <div key={p.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex gap-4 items-start">
+            <img src={p.url} alt="foto"
+              style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '10px', flexShrink: 0 }} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800 mb-1">
+                {(p.locations as any)?.name ?? 'Nepoznata lokacija'}
+              </p>
+              <p className="text-xs text-gray-400 mb-2">
+                {new Date(p.uploaded_at).toLocaleDateString('sr-RS')}
+              </p>
+              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${p.is_approved ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                {p.is_approved ? '✅ Objavljeno' : '⏳ Čeka odobrenje'}
+              </span>
+            </div>
+            <div className="flex flex-col gap-2">
+              {!p.is_approved && (
+                <button onClick={() => approve(p.id)}
+                  className="bg-green-700 text-white px-4 py-1.5 rounded-xl text-xs font-semibold hover:bg-green-800">
+                  ✅ Odobri
+                </button>
+              )}
+              <button onClick={() => reject(p.id)}
+                className="bg-red-50 text-red-600 px-4 py-1.5 rounded-xl text-xs font-semibold hover:bg-red-100">
+                🗑️ Obriši
+              </button>
+            </div>
+          </div>
+        ))}
+        {!loading && photos.length === 0 && (
+          <p className="text-center text-gray-400 py-8">Nema fotografija.</p>
+        )}
+      </div>
+    </div>
+  )
+}
 
 // ─── ProposalCard — MORA biti prije AdminDashboard ───────────────
 function ProposalCard({ prop, categories, countries, regions, onApprove, onReject }: any) {
@@ -260,7 +339,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     })
   }, [])
 
-  type Tab = 'locations' | 'add' | 'edit' | 'csv' | 'proposals'
+  type Tab = 'locations' | 'add' | 'edit' | 'csv' | 'proposals' | 'photos'
   const [tab, setTab] = useState<Tab>('locations')
   const [form, setForm] = useState({ ...EMPTY })
   const [saving, setSaving] = useState(false)
@@ -514,6 +593,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     { id: 'add', label: '✨ Dodaj + AI' },
     { id: 'csv', label: '📥 CSV Import' },
     { id: 'edit', label: editLoc ? `✏️ ${editLoc.name?.substring(0,20)}` : '✏️ Uredi' },
+    { id: 'photos', label: '📸 Slike' },
     { id: 'proposals', label: `🔔 Predlozi${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
   ]
 
@@ -993,6 +1073,10 @@ export default function AdminDashboard({ user, countries, categories, regions, l
               </button>
             </div>
           </div>
+        )}
+
+        {tab === 'photos' && (
+          <PhotosTab />
         )}
 
         {tab === 'csv' && (
