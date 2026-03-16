@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
     .from('locations')
     .select(`
       id, name, slug,
-      categories(slug),
+      categories!inner(slug, name),
       countries(name),
       regions(name)
     `)
@@ -157,9 +157,9 @@ export async function POST(request: NextRequest) {
     try {
       const aiData = await generateAIContent(
         loc.name,
-        loc.categories?.slug || 'ribolov',
-        loc.countries?.name || 'Srbija',
-        loc.regions?.name || ''
+        (Array.isArray(loc.categories) ? loc.categories[0]?.slug : (loc.categories as any)?.slug) || 'ribolov',
+        (Array.isArray(loc.countries) ? loc.countries[0]?.name : (loc.countries as any)?.name) || 'Srbija',
+        (Array.isArray(loc.regions) ? loc.regions[0]?.name : (loc.regions as any)?.name) || ''
       )
 
       // Update lokacije sa AI podacima
