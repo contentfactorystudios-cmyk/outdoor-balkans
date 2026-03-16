@@ -7,6 +7,7 @@ import WeatherWidget   from '@/components/WeatherWidget'
 import CommentsSection from '@/components/CommentsSection'
 import CategoryDetails from '@/components/CategoryDetails'
 import LocationMap     from '@/components/LocationMap'
+import PhotoGallery    from '@/components/PhotoGallery'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -218,6 +219,8 @@ export default async function LocationPage({ params }: Props) {
                 <WeatherWidget lat={lat} lng={lng} category={category} locationName={location.name} />
               </div>
             )}
+
+            <PhotoGallery locationId={location.id} locationSlug={location.slug} />
 
             <div>
               <h2 style={{ fontFamily: SERIF, fontSize: '1.2rem', fontWeight: 700, color: '#0e1a0e', marginBottom: '20px' }}>💬 Komentari zajednice</h2>
