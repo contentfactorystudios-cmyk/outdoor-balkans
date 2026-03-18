@@ -49,8 +49,15 @@ function PhotosTab() {
       <div className="grid grid-cols-1 gap-4">
         {photos.map((p: any) => (
           <div key={p.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex gap-4 items-start">
-            <img src={p.url} alt="foto"
-              style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '10px', flexShrink: 0 }} />
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <img src={p.url} alt="foto"
+                style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '10px', cursor: 'pointer' }}
+                onClick={() => window.open(p.url, '_blank')} />
+              <span style={{ position: 'absolute', bottom: '4px', right: '4px', background: 'rgba(0,0,0,0.5)',
+                color: '#fff', fontSize: '0.6rem', padding: '2px 5px', borderRadius: '4px' }}>
+                🔍 Uvećaj
+              </span>
+            </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-800 mb-1">
                 {(p.locations as any)?.name ?? 'Nepoznata lokacija'}
