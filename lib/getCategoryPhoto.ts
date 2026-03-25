@@ -14,7 +14,7 @@ export const KNOWN_PHOTOS: Record<string, string> = {
   // Ribolov
   'vlasina':        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Vlasina_2.jpg/1280px-Vlasina_2.jpg',
   'derdap':         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Djerdap_klisura.jpg/1280px-Djerdap_klisura.jpg',
-  'srebrno':        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Srebrno_jezero_2.jpg/1280px-Srebrno_jezero_2.jpg',
+  'srebrno':        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1280&h=720&fit=crop&q=85',
   'uvac':           'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Uvac_kanjon.jpg/1280px-Uvac_kanjon.jpg',
   'palicko':        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Palic_Lake_sunset.jpg/1280px-Palic_Lake_sunset.jpg',
   'palic':          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Palic_Lake_sunset.jpg/1280px-Palic_Lake_sunset.jpg',
