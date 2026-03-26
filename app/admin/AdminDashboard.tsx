@@ -111,7 +111,7 @@ function ProposalCard({ prop, categories, countries, regions, onApprove, onRejec
     setAiLoading(true)
     try {
       const res = await fetch('/api/ai-generate', {
-        method:'POST', headers:{'Content-Type':'application/json'},
+        method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
         body: JSON.stringify({
           name: editedProp.geo_name || editedProp.name,
           category: editedProp.category_slug || editedProp.category,
@@ -384,7 +384,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     setAiLoading(true); setAiMsg('🤖 AI generiše sadržaj...')
     try {
       const res = await fetch('/api/ai-generate', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ name: form.name, category: cat?.slug ?? 'ribolov', country: ctr?.name ?? 'Srbija', region: reg?.name ?? '' })
       })
       const json = await res.json()
@@ -441,7 +441,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
     if (!csvRows.length) return
     setCsvImporting(true); setCsvMsg('⏳ Importujem...'); setCsvErrors([])
     const res = await fetch('/api/csv-import', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
       body: JSON.stringify({ locations: csvRows }),
     })
     const data = await res.json()
@@ -897,7 +897,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
                 setEditAiMsg('⏳ AI generise podatke...')
                 try {
                   const res = await fetch('/api/ai-generate', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
                     body: JSON.stringify({
                       name: editLoc.name,
                       category: editLoc.categories?.slug ?? '',
@@ -1021,7 +1021,7 @@ export default function AdminDashboard({ user, countries, categories, regions, l
                 setEditAiMsg('⏳ AI generise podatke...')
                 try {
                   const res = await fetch('/api/ai-generate', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
                     body: JSON.stringify({
                       name: editLoc.name,
                       category: editLoc.categories?.slug ?? '',

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { requireAdmin } from '@/lib/adminGuard'
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const CATEGORY_SCHEMAS: Record<string, object> = {
   ribolov: {
@@ -72,6 +71,9 @@ const CATEGORY_SCHEMAS: Record<string, object> = {
 }
 
 export async function POST(request: NextRequest) {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  console.log('[DEBUG] API key prefix:', apiKey?.substring(0, 20), 'length:', apiKey?.length)
+  const client = new Anthropic({ apiKey })
   const guard = await requireAdmin()
   if ('error' in guard) return guard.error
 
@@ -106,7 +108,7 @@ Pisi na srpskom jeziku, latinicnim pismom.`
 
   try {
     const message = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
     })
